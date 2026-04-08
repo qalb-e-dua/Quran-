@@ -4,122 +4,158 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kanz Quran Digital</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Amiri&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
+        /* --- HARD RESET: This kills the gaps --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         :root { --bg-theme: #F4EFE7; --accent: #E67E22; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body, html { 
-            margin: 0; padding: 0; height: 100%; 
+            height: 100%; width: 100%;
             font-family: 'Poppins', sans-serif; 
             background-color: var(--bg-theme); 
             overflow: hidden;
-            touch-action: pan-x pan-y; /* Fixes "Zoom Joke" */
+            touch-action: pan-x pan-y; /* STOPS THE ZOOM JOKE */
         }
 
         #main-reader { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
-        .reader-content { flex: 1; overflow-y: auto; padding: 10px 15px 150px; text-align: center; }
-
-        /* Professional Header */
-        .header-section { margin-bottom: 30px; }
-        .surah-header-calligraphy { color: var(--accent); font-family: 'Scheherazade New', serif; font-size: 50px; margin: 0; }
-        .surah-en-title { font-size: 16px; color: #555; font-weight: 600; }
-        .bismillah { font-family: 'Scheherazade New', serif; font-size: 32px; margin: 15px 0; color: #000; }
-
-        /* Verse & Word Layout */
-        .verse-block { margin-bottom: 25px; width: 100%; }
-        .ar-text { font-family: 'Scheherazade New', serif; line-height: 1.4; direction: rtl; color: #111; margin: 0; }
-        .en-text { font-size: 15px; color: #666; margin-top: 4px; display: block; line-height: 1.2; }
-
-        .inline-container { line-height: 3.5; text-align: center; direction: rtl; padding: 0 10px; }
-        .inline-word-wrap { display: inline-block; text-align: center; margin: 0 6px; direction: ltr; vertical-align: top; }
-        .inline-ar { font-family: 'Scheherazade New', serif; font-size: 30px; display: block; direction: rtl; }
-        .inline-tr { font-size: 12px; color: var(--accent); display: block; margin-top: -8px; font-weight: 500; }
-
-        /* Ayah Numbers - NO RUBBISH SHAPES */
-        .ayah-num {
-            display: inline-flex; width: 28px; height: 28px; border: 1px solid #ccc;
-            border-radius: 50%; align-items: center; justify-content: center; font-size: 10px;
-            color: #888; background: white; margin: 0 5px; flex-shrink: 0;
-        }
-
-        /* Sidebar - Professional List */
-        #sidebar { position: fixed; left: 0; top: 0; width: 300px; height: 100%; background: var(--bg-theme); z-index: 2000; transition: 0.3s; border-right: 1px solid rgba(0,0,0,0.05); }
-        .sidebar-hidden #sidebar { transform: translateX(-300px); }
-        .surah-list { height: 100%; overflow-y: auto; padding: 30px 15px; }
-        .surah-item { background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-
-        /* Bottom Pill Bar */
-        .bottom-pill {
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 92%; max-width: 420px; background: white; border-radius: 50px;
-            padding: 8px 15px; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 1000;
-        }
-        .play-btn { width: 48px; height: 48px; background: var(--accent); color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
         
-        /* THE ZOOM FIX */
-        .jump-input { width: 50px; border: 1px solid #DDD; border-radius: 8px; padding: 6px; text-align: center; font-size: 16px !important; }
+        .top-nav { width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* Settings */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: none; z-index: 3000; align-items: center; justify-content: center; }
-        .settings-card { background: white; width: 320px; border-radius: 30px; padding: 25px; }
+        .reader-content { 
+            flex: 1; overflow-y: auto; overflow-x: hidden;
+            padding: 10px 15px 150px; text-align: center;
+        }
+
+        /* --- HEADER SECTION --- */
+        .header-section { margin-bottom: 20px; }
+        .surah-header-calligraphy {
+            color: var(--accent);
+            font-family: 'Scheherazade New', serif;
+            font-size: 45px;
+            line-height: 1;
+        }
+        .surah-en-title { font-size: 16px; color: #555; font-weight: 600; margin: 2px 0; }
+        .bismillah {
+            font-family: 'Scheherazade New', serif;
+            font-size: 32px;
+            margin: 10px 0;
+            color: #000;
+        }
+
+        /* --- VERSE LAYOUT (ZERO GAPS) --- */
+        .verse-block { 
+            margin-bottom: 15px; /* Space between different verses */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .ar-text { 
+            font-family: 'Scheherazade New', serif; 
+            line-height: 1.1; /* TIGHT ARABIC */
+            direction: rtl; 
+            color: #111;
+            margin: 0; padding: 0;
+        }
+        .en-text { 
+            font-size: 14px; 
+            color: #E67E22; /* Matches your orange style */
+            margin-top: 0px; /* ZERO GAP */
+            line-height: 1.1;
+            display: block;
+        }
+
+        /* --- AYAH NUMBERS (STAYS CIRCLE NO MATTER WHAT) --- */
+        .ayah-num {
+            display: inline-flex; 
+            width: 25px; height: 25px; 
+            min-width: 25px; min-height: 25px;
+            aspect-ratio: 1/1;
+            border: 1px solid #ccc;
+            border-radius: 50%; 
+            align-items: center; justify-content: center; 
+            font-size: 10px; color: #888;
+            margin: 0 5px;
+            background: white;
+            flex-shrink: 0; /* FORCES CIRCLE */
+        }
+
+        /* --- BOTTOM PILL (CENTERED & FIXED) --- */
+        .bottom-pill {
+            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+            width: 94%; max-width: 400px; background: white; border-radius: 50px;
+            padding: 5px 15px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000;
+            height: 65px;
+        }
+        .pill-btn { font-size: 20px; cursor: pointer; border:none; background:none; }
+        .play-btn { width: 45px; height: 45px; background: var(--accent); color: white; border: none; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+        
+        .pill-info { text-align: center; flex: 1; }
+        #pill-name { font-weight: 700; font-size: 13px; color: #000; display: block; }
+        #pill-juz { font-size: 9px; color: var(--accent); font-weight: 600; text-transform: uppercase; }
+
+        /* --- STOPS THE ZOOM JOKE --- */
+        .jump-input { 
+            width: 45px; 
+            border: 1px solid #DDD; 
+            border-radius: 8px; 
+            padding: 5px; 
+            text-align: center; 
+            font-size: 16px !important; /* MOBILE MUST BE 16PX TO NOT ZOOM */
+            background: #F9F9F9;
+        }
+
+        #sidebar { position: fixed; left: 0; top: 0; width: 280px; height: 100%; background: var(--bg-theme); z-index: 2000; transition: 0.3s; transform: translateX(-280px); }
+        body:not(.sidebar-hidden) #sidebar { transform: translateX(0); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: none; z-index: 3000; justify-content: center; align-items: center; }
+        .settings-card { background: white; width: 280px; border-radius: 20px; padding: 20px; text-align: center; }
     </style>
 </head>
 <body class="sidebar-hidden">
 
-<div id="sidebar"><div class="surah-list" id="sidebar-target"></div></div>
+<div id="sidebar">
+    <div style="padding: 20px;" id="sidebar-target"></div>
+</div>
 
 <div id="main-reader">
-    <header class="top-nav" style="padding: 15px 25px;">
-        <div onclick="toggleMenu()" style="font-size:24px; cursor:pointer;">📂</div>
-        <div onclick="openSettings()" style="font-size:24px; cursor:pointer;">⚙️</div>
+    <header class="top-nav">
+        <div onclick="toggleMenu()" class="pill-btn">📂</div>
+        <div onclick="openSettings()" class="pill-btn">⚙️</div>
     </header>
 
-    <div class="reader-content" id="scroll-box"><div id="quran-render"></div></div>
+    <div class="reader-content" id="scroll-box">
+        <div id="quran-render"></div>
+    </div>
 
     <div class="bottom-pill">
-        <div id="bmrk" onclick="toggleBookmark()" style="font-size:20px; cursor:pointer;">🔖</div>
+        <button id="bmrk" class="pill-btn">🔖</button>
         <button class="play-btn" onclick="toggleAudio()" id="playBtn">▶</button>
-        <div style="text-align:center; flex:1">
-            <span id="pill-name" style="font-weight:700; font-size:14px; display:block">AL SHOORA</span>
-            <span id="pill-juz" style="font-size:10px; color:var(--accent); font-weight:600">JUZ 25</span>
+        <div class="pill-info">
+            <span id="pill-name">SURAH</span>
+            <span id="pill-juz">JUZ --</span>
         </div>
         <input type="number" id="jumpInp" class="jump-input" placeholder="No." onchange="jumpTo()">
-        <div onclick="openSettings()" style="font-size:20px; cursor:pointer;">⋮</div>
+        <button onclick="openSettings()" class="pill-btn">⋮</button>
     </div>
 </div>
 
 <div class="modal-overlay" id="setModal">
     <div class="settings-card">
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-            <span>Translation</span>
-            <input type="checkbox" checked id="trCheck" onchange="renderQuran()">
+        <div style="margin-bottom:15px">Size: 
+            <button onclick="changeSize(-2)" style="padding:5px 10px">-</button> 
+            <button onclick="changeSize(2)" style="padding:5px 10px">+</button>
         </div>
-        <div style="display:flex; background:#f0f0f0; border-radius:10px; padding:5px; margin-bottom:20px">
-            <button onclick="setMode('vbv')" style="flex:1; border:none; background:white; padding:8px; border-radius:8px">Verse</button>
-            <button onclick="setMode('inline')" style="flex:1; border:none; background:none; padding:8px;">Word</button>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center">
-            <span>Size</span>
-            <div>
-                <button onclick="changeSize(-2)" style="padding:5px 15px">-</button>
-                <button onclick="changeSize(2)" style="padding:5px 15px">+</button>
-            </div>
-        </div>
-        <button onclick="closeSettings()" style="width:100%; margin-top:20px; background:var(--accent); color:white; border:none; padding:12px; border-radius:12px; font-weight:bold">Done</button>
+        <button onclick="closeSettings()" style="width:100%; background:var(--accent); color:white; border:none; padding:10px; border-radius:10px;">Close</button>
     </div>
 </div>
 
 <audio id="qAudio"></audio>
 
 <script>
-    const ARABIC_FONTS = {
-      indopak: { id: 'indopak', name: 'IndoPak', family: '"Scheherazade New", serif' },
-      kfgqpc: { id: 'kfgqpc', name: 'Uthmani', family: '"Amiri", serif' }
-    };
-
     const surahs = [
         {
             id: 42, name: "AL SHOORA", ar: "الشورى", juz: 25,
@@ -1226,10 +1262,9 @@
     ]; // <-- FIX 3: Moved ]; here to close the Surah array properly
 
     // <-- FIX 4: Removed the random { that was breaking your variables
-      let activeID = 42;
-    let fontSize = 32;
+       let activeID = 42;
+    let fontSize = 28; // Standard starting size
     let currentMode = 'vbv';
-    let currentFont = ARABIC_FONTS.indopak.family;
 
     function init() {
         const target = document.getElementById('sidebar-target');
@@ -1240,16 +1275,17 @@
             div.innerHTML = `
                 <b style="background:rgba(230,126,34,0.1); color:#E67E22; min-width:35px; height:35px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:12px;">${s.id}</b>
                 <span style="flex:1; margin-left:15px; font-weight:600; font-size:14px;">${s.name}</span>
-                <span style="font-family:'Scheherazade New', serif; font-size:20px; color:#E67E22;">${s.ar}</span>
+                <span style="font-family:'Scheherazade New', serif; font-size:22px; color:#E67E22;">${s.ar}</span>
             `;
             div.onclick = () => { activeID = s.id; loadSurah(s.id); toggleMenu(); };
             target.appendChild(div);
         });
-        loadSurah(42);
+        loadSurah(activeID);
     }
 
     function loadSurah(id) {
         const s = surahs.find(x => x.id === id);
+        if(!s) return;
         document.getElementById('pill-name').innerText = s.name;
         document.getElementById('pill-juz').innerText = "JUZ " + s.juz;
         document.getElementById('qAudio').src = s.audio;
@@ -1260,10 +1296,8 @@
         const s = surahs.find(x => x.id === activeID);
         const target = document.getElementById('quran-render');
         const showTr = document.getElementById('trCheck').checked;
-        
         let html = `<div class="header-section">
                         <div class="surah-header-calligraphy">سورة ${s.ar}</div>
-                        <div class="surah-en-title">${s.name}</div>
                         <div class="bismillah">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
                     </div>`;
         
@@ -1274,7 +1308,7 @@
                     let trText = (s.content[index + 1] && s.content[index + 1].type === 'text') ? s.content[index + 1].text : '';
                     trText = trText.replace(/^\d+\]\s*/, ''); 
                     html += `<div class="verse-block" id="ayah-${ayahCounter}">
-                        <p class="ar-text" style="font-size:${fontSize}px; font-family:${currentFont}">${item.text} <span class="ayah-num">${ayahCounter}</span></p>
+                        <p class="ar-text" style="font-size:${fontSize}px">${item.text} <span class="ayah-num">${ayahCounter}</span></p>
                         ${showTr ? `<span class="en-text">${trText}</span>` : ''}
                     </div>`;
                     ayahCounter++;
@@ -1287,7 +1321,7 @@
                     let trText = (s.content[index + 1] && s.content[index + 1].type === 'text') ? s.content[index + 1].text : '';
                     trText = trText.replace(/^\d+\]\s*/, ''); 
                     html += `<div class="inline-word-wrap" id="ayah-${ayahCounter}">
-                        <span class="inline-ar" style="font-size:${fontSize}px; font-family:${currentFont}">${item.text} <span class="ayah-num" style="width:20px; height:20px; font-size:8px;">${ayahCounter}</span></span>
+                        <span class="inline-ar" style="font-size:${fontSize}px">${item.text} <span class="ayah-num" style="width:20px; height:20px; font-size:8px;">${ayahCounter}</span></span>
                         ${showTr ? `<span class="inline-tr">${trText}</span>` : ''}
                     </div>`;
                     ayahCounter++;
@@ -1298,7 +1332,12 @@
         target.innerHTML = html;
     }
 
-    function setMode(m) { currentMode = m; renderQuran(); }
+    function setMode(m) { 
+        currentMode = m; 
+        document.getElementById('btn-vbv').style.background = m === 'vbv' ? 'white' : 'none';
+        document.getElementById('btn-word').style.background = m === 'inline' ? 'white' : 'none';
+        renderQuran(); 
+    }
     function changeSize(n) { fontSize += n; renderQuran(); }
     function toggleMenu() { document.body.classList.toggle('sidebar-hidden'); }
     function openSettings() { document.getElementById('setModal').style.display = 'flex'; }
