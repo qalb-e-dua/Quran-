@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kanz Quran Digital</title>
     <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- IndoPak Font -->
     <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
-
+    <link rel="manifest" href="manifest.json">
+    
     <style>
         :root {
             --bg-theme: #F4EFE7;
@@ -22,155 +21,109 @@
             background-color: var(--bg-theme); 
             transition: background-color 0.4s ease;
             overflow: hidden;
+            touch-action: manipulation; /* Stops accidental zooming */
         }
 
-        /* --- SIDEBAR - NOW PERFECTLY MATCHES THEME --- */
+        /* --- SIDEBAR --- */
         #sidebar {
             position: fixed; left: 0; top: 0; width: 320px; height: 100%;
             background-color: var(--bg-theme); 
             border-right: 1px solid rgba(0,0,0,0.05);
-            z-index: 2000; transition: transform 0.4s ease, background-color 0.4s ease;
+            z-index: 2000; transition: transform 0.4s ease;
         }
         .sidebar-hidden #sidebar { transform: translateX(-320px); }
-
         .surah-list { height: 100%; overflow-y: auto; padding: 40px 15px; }
 
-        /* --- BEAUTIFUL WHITE MENU CARDS --- */
         .surah-item { 
-            background: rgba(255, 255, 255, 0.7); 
-            padding: 12px 15px; 
-            border-radius: 15px; 
-            margin-bottom: 10px;
-            display: flex; 
-            align-items: center; 
-            cursor: pointer; 
-            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.7); padding: 12px 15px; 
+            border-radius: 15px; margin-bottom: 10px;
+            display: flex; align-items: center; cursor: pointer; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            border: 1px solid rgba(255,255,255,0.5);
         }
-        .surah-item.active { 
-            border-left: 6px solid var(--accent); 
-            background: #FFFFFF; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
-        /* --- ORANGE NUMBER CIRCLES --- */
         .surah-item b {
-            background: rgba(230, 126, 34, 0.12); 
-            color: var(--accent); 
-            min-width: 36px; height: 36px;
-            display: inline-flex; justify-content: center; align-items: center;
-            border-radius: 50%;
-            font-weight: 600; font-size: 14px;
-        }
-
-        /* --- ORANGE ARABIC TEXT --- */
-        .surah-item span:last-child {
-            color: var(--accent);
+            background: rgba(230, 126, 34, 0.12); color: var(--accent); 
+            min-width: 36px; height: 36px; display: inline-flex; 
+            justify-content: center; align-items: center; border-radius: 50%;
         }
 
         /* --- MAIN READER --- */
         #main-reader { width: 100vw; height: 100vh; position: relative; display: flex; flex-direction: column; align-items: center; }
         .top-nav { width: 90%; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
-        .reader-content { flex: 1; width: 85%; overflow-y: auto; padding: 20px 0 180px; scroll-behavior: smooth; text-align: center; }
+        
+        .reader-content { 
+            flex: 1; width: 100%; overflow-y: auto; 
+            padding: 20px 0 180px; text-align: center;
+        }
 
-        .header-section { margin-bottom: 40px; text-align: center; }
+        /* --- HEADER SECTION --- */
+        .header-section { margin-bottom: 30px; padding: 0 20px; }
         .surah-header-calligraphy {
             color: var(--accent);
             font-family: 'Scheherazade New', serif;
-            font-size: 55px;
+            font-size: 50px;
             margin: 0;
-            text-align: center;
         }
         .surah-en-title { font-size: 18px; color: #555; font-weight: 600; margin-top: 5px; }
         .surah-meta { font-size: 13px; color: #888; margin-top: 5px; }
-        
         .bismillah {
             font-family: 'Scheherazade New', serif;
-            font-size: 38px;
-            margin: 25px 0;
-            text-align: center;
+            font-size: 32px;
+            margin: 20px 0;
             color: #000;
-            display: block;
         }
 
-        .verse-block { margin-bottom: 35px; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .ar-line { display: flex; align-items: center; justify-content: center; width: 100%; gap: 15px; }
-        .ar-text { font-family: 'Scheherazade New', serif; font-size: 38px; line-height: 1.6; direction: rtl; }
-        .en-text { font-size: 16px; color: #666; margin-top: 5px; line-height: 1.4; }
+        /* --- VERSE LAYOUT --- */
+        .verse-block { margin-bottom: 30px; padding: 0 20px; }
+        .ar-text { 
+            font-family: 'Scheherazade New', serif; 
+            line-height: 1.6; direction: rtl; color: #111;
+        }
+        .en-text { font-size: 16px; color: #666; margin-top: 8px; line-height: 1.4; }
 
         .ayah-num {
             display: inline-flex; width: 30px; height: 30px; border: 1px solid #ccc;
-            border-radius: 50%; align-items: center; justify-content: center; font-size: 10px;
-            color: #888; background: rgba(0,0,0,0.02);
+            border-radius: 50%; align-items: center; justify-content: center; font-size: 11px;
+            color: #888; background: white; flex-shrink: 0; margin: 0 10px;
         }
 
-        .inline-container { line-height: 4; text-align: center; direction: rtl; padding: 0 20px; }
-        .inline-word-wrap { display: inline-block; text-align: center; margin: 0 10px; direction: ltr; vertical-align: top; margin-bottom: 25px; }
-        .inline-ar { font-family: 'Scheherazade New', serif; font-size: 32px; display: block; direction: rtl; color: #111; }
-        .inline-tr { font-size: 13px; color: var(--accent); display: block; margin-top: 2px; font-weight: 500; }
+        /* --- WORD BY WORD / INLINE --- */
+        .inline-container { line-height: 3.5; text-align: center; direction: rtl; padding: 0 20px; }
+        .inline-word-wrap { display: inline-block; text-align: center; margin: 0 8px; direction: ltr; vertical-align: top; }
+        .inline-ar { font-family: 'Scheherazade New', serif; font-size: 32px; display: block; direction: rtl; }
+        .inline-tr { font-size: 13px; color: var(--accent); display: block; margin-top: -10px; font-weight: 500; }
 
-        /* --- SETTINGS MODAL --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.02); backdrop-filter: blur(15px);
-            display: none; justify-content: center; align-items: center; z-index: 3000;
-        }
-        .settings-card { background: white; width: 340px; border-radius: 35px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
-        .modal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        
-        .btn-group { display: flex; background: #F2F2F7; border-radius: 12px; padding: 4px; width: 100%; margin-bottom: 15px; }
-        .btn-group button { flex: 1; border: none; background: none; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
-        .btn-group button.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: 600; }
-
-        .color-dots { display: flex; gap: 8px; }
-        .dot { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 1px solid #eee; }
-
-        //* --- PROFESSIONAL BOTTOM NAV --- */
+        /* --- BOTTOM PILL (PROFESSIONAL) --- */
         .bottom-pill {
-            position: fixed; 
-            bottom: 25px; 
-            left: 50%; 
-            transform: translateX(-50%); /* This centers it perfectly on mobile */
-            width: 92%; 
-            max-width: 450px;
-            background: white; 
-            border-radius: 50px;
-            padding: 8px 15px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; /* Spreads icons out like your picture */
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
-            z-index: 1000;
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 92%; max-width: 420px; background: white; border-radius: 50px;
+            padding: 8px 15px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1); z-index: 1000;
         }
-        .pill-btn { font-size: 20px; cursor: pointer; color: #444; display: flex; align-items: center; }
+        .pill-btn { font-size: 20px; cursor: pointer; color: #444; }
         .play-btn { 
-            width: 48px; height: 48px; 
-            background: var(--accent); color: white; 
-            border: none; border-radius: 50%; 
-            cursor: pointer; font-size: 20px;
+            width: 48px; height: 48px; background: var(--accent); color: white; 
+            border: none; border-radius: 50%; font-size: 20px;
             display: flex; align-items: center; justify-content: center;
-        }
-        .jump-input { 
-            width: 45px; border: 1px solid #EEE; 
-            border-radius: 10px; padding: 8px 2px; 
-            text-align: center; font-size: 12px;
-            background: #F8F9FA;
         }
         .pill-info { text-align: center; flex: 1; }
         #pill-name { font-weight: 700; font-size: 14px; color: #000; display: block; }
         #pill-juz { font-size: 10px; color: var(--accent); font-weight: 600; text-transform: uppercase; }
+        .jump-input { width: 40px; border: 1px solid #EEE; border-radius: 8px; padding: 5px; text-align: center; font-size: 12px; }
+
+        /* --- SETTINGS MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 3000;
+        }
+        .settings-card { background: white; width: 320px; border-radius: 30px; padding: 25px; }
+        .modal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-group { display: flex; background: #F2F2F7; border-radius: 12px; padding: 4px; margin-bottom: 15px; }
+        .btn-group button { flex: 1; border: none; background: none; padding: 10px; border-radius: 8px; font-size: 12px; }
+        .btn-group button.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: 600; }
     </style>
-<link rel="manifest" href="manifest.json">
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js');
-        });
-      }
-    </script>
 </head>
-<body>
+<body class="sidebar-hidden">
 
 <div id="sidebar">
     <div class="surah-list" id="sidebar-target"></div>
@@ -186,58 +139,42 @@
         <div id="quran-render"></div>
     </div>
 
-   <div class="bottom-pill">
-        <!-- Bookmark -->
+    <div class="bottom-pill">
         <div id="bmrk" onclick="toggleBookmark()" class="pill-btn">🔖</div>
-        
-        <!-- Play Button -->
         <button class="play-btn" onclick="toggleAudio()" id="playBtn">▶</button>
-        
-        <!-- Center Info (Surah & Juz) -->
         <div class="pill-info">
-            <span id="pill-name">AL SHOORA</span>
-            <span id="pill-juz">JUZ 25</span>
+            <span id="pill-name">LOADING...</span>
+            <span id="pill-juz">JUZ --</span>
         </div>
-
-        <!-- Jump to Ayah Input -->
-        <input type="number" id="jumpInp" class="jump-input" placeholder="Ayah" onchange="jumpTo()">
-
-        <!-- Settings Dots -->
+        <input type="number" id="jumpInp" class="jump-input" placeholder="No." onchange="jumpTo()">
         <div onclick="openSettings()" class="pill-btn">⋮</div>
-    </div>
     </div>
 </div>
 
 <div class="modal-overlay" id="setModal">
     <div class="settings-card">
         <div class="modal-row"><span>Translation</span><input type="checkbox" checked id="trCheck" onchange="renderQuran()"></div>
-        
         <div class="btn-group">
-            <button id="mode-vbv" class="active" onclick="setMode('vbv')">Verse by verse</button>
-            <button id="mode-inline" onclick="setMode('inline')">Inline</button>
+            <button id="mode-vbv" class="active" onclick="setMode('vbv')">Verse</button>
+            <button id="mode-inline" onclick="setMode('inline')">Word</button>
         </div>
-
-        <div class="modal-row">
-            <span>Theme</span>
-            <div class="color-dots">
-                <div class="dot" style="background:#FFFFFF" onclick="setTheme('#FFFFFF')"></div>
-                <div class="dot" style="background:#F4EFE7" onclick="setTheme('#F4EFE7')"></div>
-                <div class="dot" style="background:#E6FAF0" onclick="setTheme('#E6FAF0')"></div>
-                <div class="dot" style="background:#E6F3FA" onclick="setTheme('#E6F3FA')"></div>
-            </div>
-        </div>
-
         <div class="modal-row">
             <span>Size</span>
             <div>
-                <button onclick="changeSize(-2)">-</button> <span id="szVal">32pt</span> <button onclick="changeSize(2)">+</button>
+                <button onclick="changeSize(-2)">-</button> <span id="szVal">30pt</span> <button onclick="changeSize(2)">+</button>
             </div>
         </div>
-        <button onclick="closeSettings()" style="width:100%; background:var(--accent); color:white; border:none; padding:15px; border-radius:15px; font-weight:600; cursor:pointer;">Done</button>
+        <button onclick="closeSettings()" style="width:100%; background:var(--accent); color:white; border:none; padding:15px; border-radius:15px; font-weight:600;">Done</button>
     </div>
 </div>
 
 <audio id="qAudio"></audio>
+
+<script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
+    }
 
 <script>
     const ARABIC_FONTS = {
@@ -1352,7 +1289,7 @@
 
     // <-- FIX 4: Removed the random { that was breaking your variables
    let activeID = 42;
-    let fontSize = 38;
+    let fontSize = 30; // Better starting size
     let currentMode = 'vbv';
 
     function init() {
@@ -1361,7 +1298,7 @@
             const div = document.createElement('div');
             div.className = 'surah-item';
             div.innerHTML = `<b>${s.id}</b> <span style="flex:1; margin-left:15px">${s.name}</span> <span style="font-family:'Scheherazade New', serif; font-size: 20px;">${s.ar}</span>`;
-            div.onclick = () => { activeID = s.id; loadSurah(s.id); document.body.classList.add('sidebar-hidden'); };
+            div.onclick = () => { activeID = s.id; loadSurah(s.id); toggleMenu(); };
             target.appendChild(div);
         });
         loadSurah(42);
@@ -1371,6 +1308,7 @@
         const s = surahs.find(x => x.id === id);
         document.getElementById('qAudio').src = s.audio;
         document.getElementById('pill-name').innerText = s.name;
+        document.getElementById('pill-juz').innerText = "JUZ " + s.juz;
         renderQuran();
     }
 
@@ -1378,33 +1316,25 @@
         const s = surahs.find(x => x.id === activeID);
         const target = document.getElementById('quran-render');
         const showTr = document.getElementById('trCheck').checked;
-        
         let html = '';
-        let ayahCounter = 0;
-        let surahMeta = '';
-        
-        s.content.forEach(item => { if(item.text && item.text.includes('Revealed')) surahMeta = item.text; });
+        let ayahCounter = 1;
 
+        // Professional Header
         html += `<div class="header-section">
                     <div class="surah-header-calligraphy">سورة ${s.ar}</div>
                     <div class="surah-en-title">${s.name}</div>
-                    <div class="surah-meta">${surahMeta}</div>
+                    <div class="surah-meta">Revealed at Mecca</div>
                     <div class="bismillah">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
                  </div>`;
-        
+
         if (currentMode === 'vbv') {
             s.content.forEach((item, index) => {
                 if (item.type === 'arabic') {
-                    const arText = item.text;
                     let trText = (s.content[index + 1] && s.content[index + 1].type === 'text') ? s.content[index + 1].text : '';
                     trText = trText.replace(/^\d+\]\s*/, ''); 
-
                     html += `<div class="verse-block" id="ayah-${ayahCounter}">
-                        <div class="ar-line">
-                            <span class="ayah-num">${ayahCounter}</span>
-                            <span class="ar-text" style="font-size:${fontSize}px">${arText}</span>
-                        </div>
-                        ${showTr ? `<span class="en-text">${trText}</span>` : ''}
+                        <div class="ar-text" style="font-size:${fontSize}px">${item.text} <span class="ayah-num">${ayahCounter}</span></div>
+                        ${showTr ? `<div class="en-text">${trText}</div>` : ''}
                     </div>`;
                     ayahCounter++;
                 }
@@ -1416,7 +1346,7 @@
                     let trText = (s.content[index + 1] && s.content[index + 1].type === 'text') ? s.content[index + 1].text : '';
                     trText = trText.replace(/^\d+\]\s*/, ''); 
                     html += `<div class="inline-word-wrap" id="ayah-${ayahCounter}">
-                        <span class="inline-ar" style="font-size:${fontSize}px">${item.text} <span class="ayah-num">${ayahCounter}</span></span>
+                        <span class="inline-ar" style="font-size:${fontSize}px">${item.text}</span>
                         ${showTr ? `<span class="inline-tr">${trText}</span>` : ''}
                     </div>`;
                     ayahCounter++;
@@ -1434,24 +1364,20 @@
         renderQuran();
     }
 
-    function toggleBookmark() { document.getElementById('bmrk').classList.toggle('active'); }
+    function changeSize(n) { fontSize += n; document.getElementById('szVal').innerText = fontSize+'pt'; renderQuran(); }
+    function toggleMenu() { document.body.classList.toggle('sidebar-hidden'); }
+    function openSettings() { document.getElementById('setModal').style.display = 'flex'; }
+    function closeSettings() { document.getElementById('setModal').style.display = 'none'; }
+    function toggleAudio() { 
+        const a = document.getElementById('qAudio'); 
+        if(a.paused) { a.play(); document.getElementById('playBtn').innerText = "⏸"; }
+        else { a.pause(); document.getElementById('playBtn').innerText = "▶"; }
+    }
     function jumpTo() {
         const val = document.getElementById('jumpInp').value;
         const el = document.getElementById(`ayah-${val}`);
         if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    
-    /* --- COLOR FIX APPLIED HERE --- */
-    function setTheme(c) { 
-        document.documentElement.style.setProperty('--bg-theme', c);
-        document.getElementById('sidebar').style.backgroundColor = c; 
-    }
-    
-    function changeSize(n) { fontSize += n; document.getElementById('szVal').innerText = fontSize+'pt'; renderQuran(); }
-    function toggleMenu() { document.body.classList.toggle('sidebar-hidden'); }
-    function openSettings() { document.getElementById('setModal').style.display = 'flex'; }
-    function closeSettings() { document.getElementById('setModal').style.display = 'none'; }
-    function toggleAudio() { const a = document.getElementById('qAudio'); a.paused ? a.play() : a.pause(); document.getElementById('playBtn').innerText = a.paused ? "▶" : "⏸"; }
 
     init();
 </script>
