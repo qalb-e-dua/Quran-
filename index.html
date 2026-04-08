@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanz Quran Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- IndoPak Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-theme: #F4EFE7;
+            --accent: #E67E22;
+            --white: #FFFFFF;
+        }
+
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--bg-theme); 
+            transition: background-color 0.4s ease;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR - NOW PERFECTLY MATCHES THEME --- */
+        #sidebar {
+            position: fixed; left: 0; top: 0; width: 320px; height: 100%;
+            background-color: var(--bg-theme); 
+            border-right: 1px solid rgba(0,0,0,0.05);
+            z-index: 2000; transition: transform 0.4s ease, background-color 0.4s ease;
+        }
+        .sidebar-hidden #sidebar { transform: translateX(-320px); }
+
+        .surah-list { height: 100%; overflow-y: auto; padding: 40px 15px; }
+
+        /* --- BEAUTIFUL WHITE MENU CARDS --- */
+        .surah-item { 
+            background: rgba(255, 255, 255, 0.7); 
+            padding: 12px 15px; 
+            border-radius: 15px; 
+            margin-bottom: 10px;
+            display: flex; 
+            align-items: center; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .surah-item.active { 
+            border-left: 6px solid var(--accent); 
+            background: #FFFFFF; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        /* --- ORANGE NUMBER CIRCLES --- */
+        .surah-item b {
+            background: rgba(230, 126, 34, 0.12); 
+            color: var(--accent); 
+            min-width: 36px; height: 36px;
+            display: inline-flex; justify-content: center; align-items: center;
+            border-radius: 50%;
+            font-weight: 600; font-size: 14px;
+        }
+
+        /* --- ORANGE ARABIC TEXT --- */
+        .surah-item span:last-child {
+            color: var(--accent);
+        }
+
+        /* --- MAIN READER --- */
+        #main-reader { width: 100vw; height: 100vh; position: relative; display: flex; flex-direction: column; align-items: center; }
+        .top-nav { width: 90%; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
+        .reader-content { flex: 1; width: 85%; overflow-y: auto; padding: 20px 0 180px; scroll-behavior: smooth; text-align: center; }
+
+        .header-section { margin-bottom: 40px; text-align: center; }
+        .surah-ar-title { color: var(--accent); font-family: 'Scheherazade New', serif; font-size: 55px; margin: 0; }
+        .surah-en-title { font-size: 18px; color: #555; font-weight: 600; margin-top: 5px; }
+        .surah-meta { font-size: 13px; color: #888; margin-top: 5px; }
+
+        .verse-block { margin-bottom: 35px; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .ar-line { display: flex; align-items: center; justify-content: center; width: 100%; gap: 15px; }
+        .ar-text { font-family: 'Scheherazade New', serif; font-size: 38px; line-height: 1.6; direction: rtl; }
+        .en-text { font-size: 16px; color: #666; margin-top: 5px; line-height: 1.4; }
+
+        .ayah-num {
+            display: inline-flex; width: 30px; height: 30px; border: 1px solid #ccc;
+            border-radius: 50%; align-items: center; justify-content: center; font-size: 10px;
+            color: #888; background: rgba(0,0,0,0.02);
+        }
+
+        .inline-container { line-height: 4; text-align: center; direction: rtl; padding: 0 20px; }
+        .inline-word-wrap { display: inline-block; text-align: center; margin: 0 8px; direction: ltr; }
+        .inline-ar { font-family: 'Scheherazade New', serif; font-size: 32px; display: block; direction: rtl; }
+        .inline-tr { font-size: 13px; color: var(--accent); display: block; margin-top: -12px; }
+
+        /* --- SETTINGS MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.02); backdrop-filter: blur(15px);
+            display: none; justify-content: center; align-items: center; z-index: 3000;
+        }
+        .settings-card { background: white; width: 340px; border-radius: 35px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+        .modal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .btn-group { display: flex; background: #F2F2F7; border-radius: 12px; padding: 4px; width: 100%; margin-bottom: 15px; }
+        .btn-group button { flex: 1; border: none; background: none; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .btn-group button.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: 600; }
+
+        .color-dots { display: flex; gap: 8px; }
+        .dot { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 1px solid #eee; }
+
+        /* --- BOTTOM NAV --- */
+        .bottom-pill {
+            position: fixed; bottom: 30px; background: white; border-radius: 50px;
+            padding: 10px 25px; display: flex; align-items: center; gap: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .pill-btn { font-size: 22px; cursor: pointer; color: #444; }
+        .play-btn { width: 45px; height: 45px; background: var(--accent); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 20px; }
+        .jump-input { width: 50px; border: 1px solid #EEE; border-radius: 8px; padding: 5px; text-align: center; }
+    </style>
+<link rel="manifest" href="manifest.json">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js');
+        });
+      }
+    </script>
+</head>
+<body>
+
+<div id="sidebar">
+    <div class="surah-list" id="sidebar-target"></div>
+</div>
+
+<div id="main-reader">
+    <header class="top-nav">
+        <div onclick="toggleMenu()" class="pill-btn">📂</div>
+        <div onclick="openSettings()" class="pill-btn">⚙️</div>
+    </header>
+
+    <div class="reader-content" id="scroll-box">
+        <div id="quran-render"></div>
+    </div>
+
+    <div class="bottom-pill">
+        <div id="bmrk" onclick="toggleBookmark()" class="pill-btn">🔖</div>
+        <button class="play-btn" onclick="toggleAudio()" id="playBtn">▶</button>
+        <div style="text-align: center; min-width: 100px;">
+            <div id="pill-name" style="font-weight: 600; font-size: 14px;">AL SHOORA</div>
+            <div id="pill-juz" style="font-size: 10px; color: var(--accent);">Juz 25</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <input type="number" id="jumpInp" class="jump-input" placeholder="Ayah" onchange="jumpTo()">
+            <div onclick="openSettings()" class="pill-btn">⋮</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="setModal">
+    <div class="settings-card">
+        <div class="modal-row"><span>Translation</span><input type="checkbox" checked id="trCheck" onchange="renderQuran()"></div>
+        
+        <div class="btn-group">
+            <button id="mode-vbv" class="active" onclick="setMode('vbv')">Verse by verse</button>
+            <button id="mode-inline" onclick="setMode('inline')">Inline</button>
+        </div>
+
+        <div class="modal-row">
+            <span>Theme</span>
+            <div class="color-dots">
+                <div class="dot" style="background:#FFFFFF" onclick="setTheme('#FFFFFF')"></div>
+                <div class="dot" style="background:#F4EFE7" onclick="setTheme('#F4EFE7')"></div>
+                <div class="dot" style="background:#E6FAF0" onclick="setTheme('#E6FAF0')"></div>
+                <div class="dot" style="background:#E6F3FA" onclick="setTheme('#E6F3FA')"></div>
+            </div>
+        </div>
+
+        <div class="modal-row">
+            <span>Size</span>
+            <div>
+                <button onclick="changeSize(-2)">-</button> <span id="szVal">32pt</span> <button onclick="changeSize(2)">+</button>
+            </div>
+        </div>
+        <button onclick="closeSettings()" style="width:100%; background:var(--accent); color:white; border:none; padding:15px; border-radius:15px; font-weight:600; cursor:pointer;">Done</button>
+    </div>
+</div>
+
+<audio id="qAudio"></audio>
+
+<script>
+    const ARABIC_FONTS = {
+      indopak: { id: 'indopak', name: 'IndoPak', family: '"Scheherazade New", serif' },
+      kfgqpc: { id: 'kfgqpc', name: 'Uthmani', family: '"Amiri", serif' }
+    };
+
+    const surahs = [
+        {
+            id: 42, name: "AL SHOORA", ar: "الشورى", juz: 25,
+            audio: 'https://server10.mp3quran.net/minsh/042.mp3',
+            content: [
+
+             { type: 'section-title', text: 'AL SHOORA (THE CONSULTATION)' },
+      { type: 'text', text: '(Revealed at Mecca - 53 verses)' },
+      { type: 'arabic', text: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ' },
+      { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'حـمۤ' },
+      { type: 'text', text: '1] Ha-Meem.(Alphabets of the Arabic language - Allah, and to whomever He reveals, know their precise meanings.)' },
+      { type: 'arabic', text: 'عـسۤـقۤ' },
+      { type: 'text', text: '2] A’in-Seen-Qaf. (Alphabets of the Arabic language - Allah, and to whomever He reveals, know their precise meanings.)' },
+      { type: 'arabic', text: 'كَذٰلِكَ يُوحِیْۤ اِلَيْكَ وَ اِلَى الَّذِيْنَ مِنْ قَبْلِكَ اللّٰهُ الْعَزِيْزُ الْحَكِيْمُ' },
+      { type: 'text', text: '3] This is how Allah the Most Honourable, the All Knowing sends the divine revelation to you (O dear Prophet Mohammed - peace and blessings be upon him) and to those before you.' },
+      { type: 'arabic', text: 'لَهٗ مَا فِی السَّمٰوٰتِ وَ مَا فِی الْاَرْضِ ؕ وَ هُوَ الْعَلِیُّ الْعَظِيْمُ' },
+      { type: 'text', text: '4] To Him only belongs all whatever is in the heavens and all whatever is in the earth; and He is the Supreme, the Greatest.' },
+      { type: 'arabic', text: 'تَكَادُ السَّمٰوٰتُ يَتَفَطَّرْنَ مِنْ فَوْقِهِنَّ وَ الْمَلٰٓئِكَةُ يُسَبِّحُوْنَ بِحَمْدِ رَبِّهِمْ وَ يَسْتَغْفِرُوْنَ لِمَنْ فِی الْاَرْضِ ؕ اَلَاۤ اِنَّ اللّٰهَ هُوَ الْغَفُوْرُ الرَّحِيْمُ' },
+      { type: 'text', text: '5] The heavens nearly split apart from above - and the angels say the Purity of their Lord while praising Him, and seek forgiveness for those on earth; pay heed! Indeed Allah only is the Oft Forgiving, the Most Merciful.' },
+      { type: 'arabic', text: 'وَ الَّذِيْنَ اتَّخَذُوْا مِنْ دُوْنِهٖۤ اَوْلِيَآءَ اللّٰهُ حَفِيْظٌ عَلَيْهِمْ ۖ وَ مَاۤ اَنْتَ عَلَيْهِمْ بِوَكِيْلٍ' },
+      { type: 'text', text: '6] And Allah is watching those who have chosen supporters besides Him; and you are not responsible for them.' },
+      { type: 'arabic', text: 'وَ كَذٰلِكَ اَوْحَيْنَاۤ اِلَيْكَ قُرْاٰنًا عَرَبِيًّا لِّتُنْذِرَ اُمَّ الْقُرٰى وَ مَنْ حَوْلَهَا وَ تُنْذِرَ يَوْمَ الْجَمْعِ لَا رَيْبَ فِيْهِ ؕ فَرِيْقٌ فِی الْجَنَّةِ وَ فَرِيْقٌ فِی السَّعِيْرِ' },
+      { type: 'text', text: '7] And this is how We have divinely revealed to you the Qur’an in Arabic, for you to warn the people of the mother of all towns - Mecca - and those around it, and to warn of the Day of Assembling of which there is no doubt; a group is in Paradise, and another group is in hell.' },
+      { type: 'arabic', text: 'وَ لَوْ شَآءَ اللّٰهُ لَجَعَلَهُمْ اُمَّةً وَّاحِدَةً وَّ لٰكِنْ يُّدْخِلُ مَنْ يَّشَآءُ فِیْ رَحْمَتِهٖ ؕ وَ الظّٰلِمُوْنَ مَا لَهُمْ مِّنْ وَّلِیٍّ وَّ لَا نَصِيْرٍ' },
+      { type: 'text', text: '8] And had Allah willed, He could have made them all upon one religion, but He admits whomever He wills into His mercy; and the unjust do not have any friend nor any supporter.' },
+      { type: 'arabic', text: 'اَمِ اتَّخَذُوْا مِنْ دُوْنِهٖۤ اَوْلِيَآءَ ۚ فَاللّٰهُ هُوَ الْوَلِیُّ وَ هُوَ يُحْیِ الْمَوْتٰى ؕ وَ هُوَ عَلٰى كُلِّ شَیْءٍ قَدِيْرٌ' },
+      { type: 'text', text: '9] What! Have they appointed supporters other than Allah? So (know that) Allah only is the Supporter, and He will revive the dead; and He is Able to do all things.' },
+      { type: 'arabic', text: 'وَ مَا اخْتَلَفْتُمْ فِيْهِ مِنْ شَیْءٍ فَحُكْمُهٗۤ اِلَى اللّٰهِ ؕ ذٰلِكُمُ اللّٰهُ رَبِّیْ عَلَيْهِ تَوَكَّلْتُ ۖ وَ اِلَيْهِ اُنِيْبُ' },
+      { type: 'text', text: '10] “The final decision for the matters in which you differ rests with Allah; such is my Lord - I rely on Him; and towards Him do I incline.”' },
+      { type: 'arabic', text: 'فَاطِرُ السَّمٰوٰتِ وَ الْاَرْضِ ؕ جَعَلَ لَكُمْ مِّنْ اَنْفُسِكُمْ اَزْوَاجًا وَّ مِنَ الْاَنْعَامِ اَزْوَاجًا ۚ يَذْرَؤُكُمْ فِيْهِ ؕ لَيْسَ كَمِثْلِهٖ شَیْءٌ ۚ وَ هُوَ السَّمِيْعُ الْبَصِيْرُ' },
+      { type: 'text', text: '11] The Maker of the heavens and the earth; He has created pairs for you from yourselves and pairs from the animals; He spreads your generation; nothing is like Him; and He only is the All Hearing, the All Seeing.' },
+      { type: 'arabic', text: 'لَهٗ مَقَالِيْدُ السَّمٰوٰتِ وَ الْاَرْضِ ۚ يَبْسُطُ الرِّزْقَ لِمَنْ يَّشَآءُ وَ يَقْدِرُ ؕ اِنَّهٗ بِكُلِّ شَیْءٍ عَلِيْمٌ' },
+      { type: 'text', text: '12] For Him only are the keys of the heavens and the earth; He increases the sustenance for whomever He wills and restricts it; indeed He is the All Knowing.' },
+      { type: 'arabic', text: 'شَرَعَ لَكُمْ مِّنَ الدِّيْنِ مَا وَصّٰى بِهٖ نُوْحًا وَّ الَّذِیْۤ اَوْحَيْنَاۤ اِلَيْكَ وَ مَا وَصَّيْنَا بِهٖۤ اِبْرٰهِيْمَ وَ مُوْسٰى وَ عِيْسٰۤى اَنْ اَقِيْمُوا الدِّيْنَ وَ لَا تَتَفَرَّقُوْا فِيْهِ ؕ كَبُرَ عَلَى الْمُشْرِكِيْنَ مَا تَدْعُوْهُمْ اِلَيْهِ ؕ اَللّٰهُ يَجْتَبِیْۤ اِلَيْهِ مَنْ يَّشَآءُ وَ يَهْدِیْۤ اِلَيْهِ مَنْ يُّنِيْبُ' },
+      { type: 'text', text: '13] He has kept for you the same path of religion which He commanded Nooh, and what We divinely reveal to you (O dear Prophet Mohammed - peace and blessings be upon him), and what We had commanded to Ibrahim and Moosa and Eisa that, “Keep the religion proper, and do not create divisions in it”; the polytheists find the matter what you call them to as intolerable; Allah chooses for His proximity whomever He wills, and guides towards Himself whoever inclines (towards Him).' },
+      { type: 'arabic', text: 'وَ مَا تَفَرَّقُوْۤا اِلَّا مِنْۢ بَعْدِ مَا جَآءَهُمُ الْعِلْمُ بَغْيًاۢ بَيْنَهُمْ ؕ وَ لَوْ لَا كَلِمَةٌ سَبَقَتْ مِنْ رَّبِّكَ اِلٰۤى اَجَلٍ مُّسَمًّى لَّقُضِیَ بَيْنَهُمْ ؕ وَ اِنَّ الَّذِيْنَ اُوْرِثُوا الْكِتٰبَ مِنْۢ بَعْدِهِمْ لَفِیْ شَكٍّ مِّنْهُ مُرِيْبٍ' },
+      { type: 'text', text: '14] And they did not cause divisions except after the knowledge had come to them, because of jealousy among themselves; and were it not for a Word that had already gone forth from your Lord, the judgement would have been passed upon them long ago; and indeed those who inherited the Book after them are in an intriguing doubt regarding it.' },
+      { type: 'arabic', text: 'فَلِذٰلِكَ فَادْعُ ۚ وَ اسْتَقِمْ كَمَاۤ اُمِرْتَ ۚ وَ لَا تَتَّبِعْ اَهْوَآءَهُمْ ۚ وَ قُلْ اٰمَنْتُ بِمَاۤ اَنْزَلَ اللّٰهُ مِنْ كِتٰبٍ ۚ وَ اُمِرْتُ لِاَعْدِلَ بَيْنَكُمْ ؕ اَللّٰهُ رَبُّنَا وَ رَبُّكُمْ ؕ لَنَاۤ اَعْمَالُنَا وَ لَكُمْ اَعْمَالُكُمْ ؕ لَا حُجَّةَ بَيْنَنَا وَ بَيْنَكُمْ ؕ اَللّٰهُ يَجْمَعُ بَيْنَنَا ۚ وَ اِلَيْهِ الْمَصِيْرُ' },
+      { type: 'text', text: '15] For this reason, call them (to Islam); and remain firm, as you are commanded to; and do not follow their desires; and say, “I accept faith in whichever Book Allah has sent down; and I am commanded to judge fairly between you; Allah is the Lord of all - ours and yours; for us are our deeds and for you are your misdeeds; there is no debate between us and you; Allah will gather all of us together; and towards Him is the return.”' },
+      { type: 'arabic', text: 'وَ الَّذِيْنَ يُحَآجُّوْنَ فِی اللّٰهِ مِنْۢ بَعْدِ مَا اسْتُجِيْبَ لَهٗ حُجَّتُهُمْ دَاحِضَةٌ عِنْدَ رَبِّهِمْ وَ عَلَيْهِمْ غَضَبٌ وَّ لَهُمْ عَذَابٌ شَدِيْدٌ' },
+      { type: 'text', text: '16] And those who fight regarding Allah after the Muslims have accepted His call, their reasoning does not hold at all before their Lord, and upon them is wrath, and for them is a severe punishment.' },
+      { type: 'arabic', text: 'اَللّٰهُ الَّذِیْۤ اَنْزَلَ الْكِتٰبَ بِالْحَقِّ وَ الْمِيْزَانَ ؕ وَ مَا يُدْرِيْكَ لَعَلَّ السَّاعَةَ قَرِيْبٌ' },
+      { type: 'text', text: '17] It is Allah Who has sent down the Book with the truth, and the Scales of Justice; and what do you know - possibly the Last Day could really be near!' },
+      { type: 'arabic', text: 'يَسْتَعْجِلُ بِهَا الَّذِيْنَ لَا يُؤْمِنُوْنَ بِهَا ۚ وَ الَّذِيْنَ اٰمَنُوْا مُشْفِقُوْنَ مِنْهَا وَ يَعْلَمُوْنَ اَنَّهَا الْحَقُّ ؕ اَلَاۤ اِنَّ الَّذِيْنَ يُمَارُوْنَ فِی السَّاعَةِ لَفِیْ ضَلٰلٍۢ بَعِيْدٍ' },
+      { type: 'text', text: '18] Those who do not believe in it are impatient for it, and those who believe in it fear it and know that indeed it is the truth; pay heed! Those who doubt the Last Day are certainly in extreme error.' },
+      { type: 'arabic', text: 'اَللّٰهُ لَطِيْفٌۢ بِعِبَادِهٖ يَرْزُقُ مَنْ يَّشَآءُ ۚ وَ هُوَ الْقَوِیُّ الْعَزِيْزُ' },
+      { type: 'text', text: '19] Allah is Benevolent upon His bondmen - He bestows sustenance to whomever He wills; and He only is the All Powerful, the Most Honourable.' },
+      { type: 'arabic', text: 'مَنْ كَانَ يُرِيْدُ حَرْثَ الْاٰخِرَةِ نَزِدْ لَهٗ فِیْ حَرْثِهٖ ۚ وَ مَنْ كَانَ يُرِيْدُ حَرْثَ الدُّنْيَا نُؤْتِهٖ مِنْهَا وَ مَا لَهٗ فِی الْاٰخِرَةِ مِنْ نَّصِيْبٍ' },
+      { type: 'text', text: '20] Whoever aspires for the yield of the Hereafter - We increase its yield for him; and whoever aspires for the yield of this world - We give him part of it, and he has no portion in the Hereafter.' },
+      { type: 'arabic', text: 'اَمْ لَهُمْ شُرَكٰٓؤُا شَرَعُوْا لَهُمْ مِّنَ الدِّيْنِ مَا لَمْ يَأْذَنْ بِهِ اللّٰهُ ؕ وَ لَوْ لَا كَلِمَةُ الْفَصْلِ لَقُضِیَ بَيْنَهُمْ ؕ وَ اِنَّ الظّٰلِمِيْنَ لَهُمْ عَذَابٌ اَلِيْمٌ' },
+      { type: 'text', text: '21] Or do they have associate deities who have appointed for them a religion, which Allah has not permitted? And were it not for a Word that had already been decided, the judgement would have been passed between them here itself; and indeed for the unjust is a painful punishment.' },
+      { type: 'arabic', text: 'تَرَى الظّٰلِمِيْنَ مُشْفِقِيْنَ مِمَّا كَسَبُوْا وَ هُوَ وَاقِعٌۢ بِهِمْ ؕ وَ الَّذِيْنَ اٰمَنُوْا وَ عَمِلُوا الصّٰلِحٰتِ فِیْ رَوْضٰتِ الْجَنّٰتِ ۚ لَهُمْ مَا يَشَآؤُنَ عِنْدَ رَبِّهِمْ ؕ ذٰلِكَ هُوَ الْفَضْلُ الْكَبِيْرُ' },
+      { type: 'text', text: '22] You will see the unjust getting terrified of their own deeds, and (evil of) their deeds will certainly befall them; and (that) those who accepted faith and performed good deeds are in blossoming Gardens of Paradise; for them is whatever they wish from their Lord; this only is the great munificence (of Allah).' },
+      { type: 'arabic', text: 'ذٰلِكَ الَّذِیْ يُبَشِّرُ اللّٰهُ عِبَادَهُ الَّذِيْنَ اٰمَنُوْا وَ عَمِلُوا الصّٰلِحٰتِ ؕ قُلْ لَّاۤ اَسْئَلُكُمْ عَلَيْهِ اَجْرًا اِلَّا الْمَوَدَّةَ فِی الْقُرْبٰى ؕ وَ مَنْ يَّقْتَرِفْ حَسَنَةً نَّزِدْ لَهٗ فِيْهَا حُسْنًا ؕ اِنَّ اللّٰهَ غَفُوْرٌ شَكُوْرٌ' },
+      { type: 'text', text: '23] This is what Allah gives the glad tidings of to His bondmen who accept faith and do good deeds; say (O dear Prophet Mohammed - peace and blessings be upon him) “I do not ask any fee from you upon this, except the love between close ones”; and whoever performs a good deed - We further increase the goodness in it for him; indeed Allah is Oft Forgiving, Most Appreciative.' },
+      { type: 'arabic', text: 'اَمْ يَقُوْلُوْنَ افْتَرٰى عَلَى اللّٰهِ كَذِبًا ۚ فَاِنْ يَّشَاِ اللّٰهُ يَخْتِمْ عَلٰى قَلْبِكَ ؕ وَ يَمْحُ اللّٰهُ الْبَاطِلَ وَ يُحِقُّ الْحَقَّ بِكَلِمٰتِهٖ ؕ اِنَّهٗ عَلِيْمٌۢ بِذَاتِ الصُّدُوْرِ' },
+      { type: 'text', text: '24] What! They dare say that, “He has fabricated a lie against Allah”? And if Allah wills, He can seal your heart by His mercy and protection ; and Allah wipes out falsehood and proves the truth by His Words; indeed He knows what lies within the hearts. ( So that you may not be agonised by what they do).' },
+      { type: 'arabic', text: 'وَ هُوَ الَّذِیْ يَقْبَلُ التَّوْبَةَ عَنْ عِبَادِهٖ وَ يَعْفُوْا عَنِ السَّيِّاٰتِ وَ يَعْلَمُ مَا تَفْعَلُوْنَ' },
+      { type: 'text', text: '25] And it is He Who accepts repentance from His bondmen, and pardons sins *, and knows all your deeds. (Repentance for the cardinal sins, while lesser sins are wiped out by good deeds.)' },
+      { type: 'arabic', text: 'وَ يَسْتَجِيْبُ الَّذِيْنَ اٰمَنُوْا وَ عَمِلُوا الصّٰلِحٰتِ وَ يَزِيْدُهُمْ مِّنْ فَضْلِهٖ ؕ وَ الْكٰفِرُوْنَ لَهُمْ عَذَابٌ شَدِيْدٌ' },
+      { type: 'text', text: '26] And He accepts the prayers of those who accept faith and do good deeds, and gives them a greater reward by His munificence; and for the disbelievers is a severe punishment.' },
+      { type: 'arabic', text: 'وَ لَوْ بَسَطَ اللّٰهُ الرِّزْقَ لِعِبَادِهٖ لَبَغَوْا فِی الْاَرْضِ وَ لٰكِنْ يُنَزِّلُ بِقَدَرٍ مَّا يَشَآءُ ؕ اِنَّهٗ بِعِبَادِهٖ خَبِيْرٌۢ بَصِيْرٌ' },
+      { type: 'text', text: '27] And had Allah increased the sustenance for all His slaves, they would have surely caused turmoil in the land, but He sends it down by a proper assessment as He wills; indeed He is Well Aware of, Seeing His bondmen.' },
+      { type: 'arabic', text: 'وَ هُوَ الَّذِیْ يُنَزِّلُ الْغَيْثَ مِنْۢ بَعْدِ مَا قَنَطُوْا وَ يَنْشُرُ رَحْمَتَهٗ ؕ وَ هُوَ الْوَلِیُّ الْحَمِيْدُ' },
+      { type: 'text', text: '28] And it is He Who sends down the rain when they have despaired, and spreads out His mercy; and He is the Benefactor, the Most Praiseworthy.' },
+      { type: 'arabic', text: 'وَ مِنْ اٰيٰتِهٖ خَلْقُ السَّمٰوٰتِ وَ الْاَرْضِ وَ مَا بَثَّ فِيْهِمَا مِنْ دَاۤبَّةٍ ؕ وَ هُوَ عَلٰى جَمْعِهِمْ اِذَا يَشَآءُ قَدِيْرٌ' },
+      { type: 'text', text: '29] And among His signs is the creation of the heavens and the earth, and the moving creatures dispersed in it; and He is Able to gather them whenever He wills.' },
+      { type: 'arabic', text: 'وَ مَاۤ اَصَابَكُمْ مِّنْ مُّصِيْبَةٍ فَبِمَا كَسَبَتْ اَيْدِيْكُمْ وَ يَعْفُوْا عَنْ كَثِيْرٍؕ' },
+      { type: 'text', text: '30] And whatever calamity befalls you, is because of what your hands have earned - and there is a great deal He pardons!' },
+      { type: 'arabic', text: 'وَ مَاۤ اَنْتُمْ بِمُعْجِزِيْنَ فِی الْاَرْضِ ۚ وَ مَا لَكُمْ مِّنْ دُوْنِ اللّٰهِ مِنْ وَّلِیٍّ وَّ لَا نَصِيْرٍ' },
+      { type: 'text', text: '31] And you cannot escape in the earth; and you have neither a friend nor any supporter against Allah.' },
+      { type: 'arabic', text: 'وَ مِنْ اٰيٰتِه الْجَوَارِ فِی الْبَحْرِ كَالْاَعْلَامِؕ' },
+      { type: 'text', text: '32] And among His signs are the ships sailing on the sea, like hills.' },
+      { type: 'arabic', text: 'اِنْ يَّشَاْ يُسْكِنِ الرِّيْحَ فَيَظْلَلْنَ رَوَاكِدَ عَلٰى ظَهْرِهٖ ؕ اِنَّ فِیْ ذٰلِكَ لَاٰيٰتٍ لِّكُلِّ صَبَّارٍ شَكُوْرٍ' },
+      { type: 'text', text: '33] If He wills, He can calm the winds so the ships remain still on the sea surface; indeed in this are signs for every greatly enduring, grateful person.' },
+      { type: 'arabic', text: 'اَوْ يُوْبِقْهُنَّ بِمَا كَسَبُوْا وَ يَعْفُ عَنْ كَثِيْرٍ' },
+      { type: 'text', text: '34] Or He can ruin them due to peoples’ sins and He can forgive a great deal.' },
+      { type: 'arabic', text: 'وَّ يَعْلَمَ الَّذِيْنَ يُجَادِلُوْنَ فِیْۤ اٰيٰتِنَا ؕ مَا لَهُمْ مِّنْ مَّحِيْصٍ' },
+      { type: 'text', text: '35] And for those who dispute regarding Our signs to realise; that they do not have a place to escape to.' },
+      { type: 'arabic', text: 'فَمَاۤ اُوْتِيْتُمْ مِّنْ شَیْءٍ فَمَتَاعُ الْحَيٰوةِ الدُّنْيَا ۚ وَ مَا عِنْدَ اللّٰهِ خَيْرٌ وَّ اَبْقٰى لِلَّذِيْنَ اٰمَنُوْا وَ عَلٰى رَبِّهِمْ يَتَوَكَّلُوْنَ' },
+      { type: 'text', text: '36] Whatever you have received is only for usage in the life of this world, and that which is with Allah is much better and more lasting - for those who believe and rely upon their Lord.' },
+      { type: 'arabic', text: 'وَ الَّذِيْنَ يَجْتَنِبُوْنَ كَبٰٓئِرَ الْاِثْمِ وَ الْفَوَاحِشَ وَ اِذَا مَا غَضِبُوْا هُمْ يَغْفِرُوْنَ' },
+      { type: 'text', text: '37] And (for) those who avoid cardinal sins and indecencies, and forgive (even) when they are angry.' },
+      { type: 'arabic', text: 'وَ الَّذِيْنَ اسْتَجَابُوْا لِرَبِّهِمْ وَ اَقَامُوا الصَّلٰوةَ ۪ وَ اَمْرُهُمْ شُوْرٰى بَيْنَهُمْ ۪ وَ مِمَّا رَزَقْنٰهُمْ يُنْفِقُوْنَ' },
+      { type: 'text', text: '38] And those who obeyed the command of their Lord and kept the prayer established; and whose affairs are with mutual consultation; and who spend in Our cause from what We have bestowed upon them.' },
+      { type: 'arabic', text: 'وَ الَّذِيْنَ اِذَاۤ اَصَابَهُمُ الْبَغْیُ هُمْ يَنْتَصِرُوْنَ' },
+      { type: 'text', text: '39] And those who take revenge when rebellion harms them.' },
+      { type: 'arabic', text: 'وَ جَزٰٓؤُا سَيِّئَةٍ سَيِّئَةٌ مِّثْلُهَا ۚ فَمَنْ عَفَا وَ اَصْلَحَ فَاَجْرُهٗ عَلَى اللّٰهِ ؕ اِنَّهٗ لَا يُحِبُّ الظّٰلِمِيْنَ' },
+      { type: 'text', text: '40] The retribution of a harmful deed is the harm equal to it; so whoever forgives and makes amends, so his reward is upon Allah; indeed He does not befriend the unjust.' },
+      { type: 'arabic', text: 'وَ لَمَنِ انْتَصَرَ بَعْدَ ظُلْمِهٖ فَاُولٰٓئِكَ مَا عَلَيْهِمْ مِّنْ سَبِيْلٍؕ' },
+      { type: 'text', text: '41] And there is no way of reproach against those who take revenge after being wronged.' },
+      { type: 'arabic', text: 'اِنَّمَا السَّبِيْلُ عَلَى الَّذِيْنَ يَظْلِمُوْنَ النَّاسَ وَ يَبْغُوْنَ فِی الْاَرْضِ بِغَيْرِ الْحَقِّ ؕ اُولٰٓئِكَ لَهُمْ عَذَابٌ اَلِيْمٌ' },
+      { type: 'text', text: '42] Reproach is only against those who oppress people, and wrongfully spread rebellion in the land; for them is a painful punishment.' },
+      { type: 'arabic', text: 'وَ لَمَنْ صَبَرَ وَ غَفَرَ اِنَّ ذٰلِكَ لَمِنْ عَزْمِ الْاُمُوْرِ' },
+      { type: 'text', text: '43] And indeed whoever patiently endured and forgave - then indeed these are acts of great courage.' },
+      { type: 'arabic', text: 'وَ مَنْ يُّضْلِلِ اللّٰهُ فَمَا لَهٗ مِنْ وَّلِیٍّ مِّنْۢ بَعْدِهٖ ؕ وَ تَرَى الظّٰلِمِيْنَ لَمَّا رَاَوُا الْعَذَابَ يَقُوْلُوْنَ هَلْ اِلٰى مَرَدٍّ مِّنْ سَبِيْلٍ' },
+      { type: 'text', text: '44] And whomever Allah sends astray, there is no friend for him against Allah; and you will see the unjust when they behold the punishment saying, “Is there a way to return?”' },
+      { type: 'arabic', text: 'وَ تَرٰهُمْ يُعْرَضُوْنَ عَلَيْهَا خٰشِعِيْنَ مِنَ الذُّلِّ يَنْظُرُوْنَ مِنْ طَرْفٍ خَفِیٍّ ؕ وَ قَالَ الَّذِيْنَ اٰمَنُوْۤا اِنَّ الْخٰسِرِيْنَ الَّذِيْنَ خَسِرُوْۤا اَنْفُسَهُمْ وَ اَهْلِيْهِمْ يَوْمَ الْقِيٰمَةِ ؕ اَلَاۤ اِنَّ الظّٰلِمِيْنَ فِیْ عَذَابٍ مُّقِيْمٍ' },
+      { type: 'text', text: '45] And you will see them being presented upon the fire, cowering with disgrace watching with concealed eyes; and the believers will say, “Indeed ruined are those who have lost themselves and their families on the Day of Resurrection”; pay heed! Indeed the unjust are in a punishment that will never end.' },
+      { type: 'arabic', text: 'وَ مَا كَانَ لَهُمْ مِّنْ اَوْلِيَآءَ يَنْصُرُوْنَهُمْ مِّنْ دُوْنِ اللّٰهِ ؕ وَ مَنْ يُّضْلِلِ اللّٰهُ فَمَا لَهٗ مِنْ سَبِيْلٍؕ' },
+      { type: 'text', text: '46] And they had no friends to help them against Allah; and there is no way for one whom Allah sends astray.' },
+      { type: 'arabic', text: 'اِسْتَجِيْبُوْا لِرَبِّكُمْ مِّنْ قَبْلِ اَنْ يَّأْتِیَ يَوْمٌ لَّا مَرَدَّ لَهٗ مِنَ اللّٰهِ ؕ مَا لَكُمْ مِّنْ مَّلْجَاٍ يَّوْمَئِذٍ وَ مَا لَكُمْ مِّنْ نَّكِيْرٍ' },
+      { type: 'text', text: '47] Obey your Lord before the advent of a Day from Allah, which cannot be averted; you will not have any refuge on that day, nor will you be able to deny.' },
+      { type: 'arabic', text: 'فَاِنْ اَعْرَضُوْا فَمَاۤ اَرْسَلْنٰكَ عَلَيْهِمْ حَفِيْظًا ؕ اِنْ عَلَيْكَ اِلَّا الْبَلٰغُ ؕ وَ اِنَّاۤ اِذَاۤ اَذَقْنَا الْاِنْسَانَ مِنَّا رَحْمَةً فَرِحَ بِهَا ۚ وَ اِنْ تُصِبْهُمْ سَيِّئَةٌۢ بِمَا قَدَّمَتْ اَيْدِيْهِمْ فَاِنَّ الْاِنْسَانَ كَفُوْرٌ' },
+      { type: 'text', text: '48] So if they turn away from you, We have not sent you as a guardian over them; upon you is nothing but to convey (the message); and when We make man taste some mercy from Us, he rejoices upon it; and if some harm reaches them because of what their own hands have sent before, thereupon man is ungrateful!' },
+      { type: 'arabic', text: 'لِلّٰهِ مُلْكُ السَّمٰوٰتِ وَ الْاَرْضِ ؕ يَخْلُقُ مَا يَشَآءُ ؕ يَهَبُ لِمَنْ يَّشَآءُ اِنَاثًا وَّ يَهَبُ لِمَنْ يَّشَآءُ الذُّكُوْرَ' },
+      { type: 'text', text: '49] For Allah only is the kingship of the heavens and the earth; He creates whatever He wills; He may bestow daughters to whomever He wills, and sons to whomever He wills.' },
+      { type: 'arabic', text: 'اَوْ يُزَوِّجُهُمْ ذُكْرَانًا وَّ اِنَاثًا ۚ وَ يَجْعَلُ مَنْ يَّشَآءُ عَقِيْمًا ؕ اِنَّهٗ عَلِيْمٌ قَدِيْرٌ' },
+      { type: 'text', text: '50] Or may mix them, the sons and daughters; and may make barren whomever He wills; indeed He is All Knowing, Able.' },
+      { type: 'arabic', text: 'وَ مَا كَانَ لِبَشَرٍ اَنْ يُّكَلِّمَهُ اللّٰهُ اِلَّا وَحْيًا اَوْ مِنْ وَّرَآئِ حِجَابٍ اَوْ يُرْسِلَ رَسُوْلًا فَيُوْحِیَ بِاِذْنِهٖ مَا يَشَآءُ ؕ اِنَّهٗ عَلِیٌّ حَكِيْمٌ' },
+      { type: 'text', text: '51] And it is not for any human that Allah may speak to him except as a divine revelation or while the human is on this side of the veil of greatness, or that He sends an angel to reveal by His permission, whatever He wills; indeed He is Supreme, Wise.' },
+      { type: 'arabic', text: 'وَ كَذٰلِكَ اَوْحَيْنَاۤ اِلَيْكَ رُوْحًا مِّنْ اَمْرِنَا ؕ مَا كُنْتَ تَدْرِی مَا الْكِتٰبُ وَ لَا الْاِيْمَانُ وَ لٰكِنْ جَعَلْنٰهُ نُوْرًا نَّهْدِیْ بِهٖ مَنْ نَّشَآءُ مِنْ عِبَادِنَا ؕ وَ اِنَّكَ لَتَهْدِیْۤ اِلٰى صِرَاطٍ مُّسْتَقِيْمٍ' },
+      { type: 'text', text: '52] And this is how We sent the divine revelation to you (O dear Prophet Mohammed - peace and blessings be upon him) - a life giving thing, by Our command; neither did you know the Book nor the detailed commands of religion, but We have made this Qur’an a light by which We guide whomever We will from Our bondmen; and indeed you surely do guide to the Straight Path.' },
+      { type: 'arabic', text: 'صِرَاطِ اللّٰهِ الَّذِیْ لَهٗ مَا فِی السَّمٰوٰتِ وَ مَا فِی الْاَرْضِ ؕ اَلَاۤ اِلَى اللّٰهِ تَصِيْرُ الْاُمُوْرُ' },
+      { type: 'text', text: '53] The path of Allah - the One to Whom only belongs all whatever is in the heavens and all whatever is in the earth; pay heed! Towards Allah only do all matters return.' }
+            ]
+        }, // <-- FIX 1: Changed ]; to }, so the list can continue
+
+        { // <-- FIX 2: Added missing opening bracket { for Surah 43
+            id: 43, name: "AL ZUKHRUF", ar: "الزخرف", juz: 25,
+            audio: 'https://server10.mp3quran.net/minsh/043.mp3',
+            content: [
+                { type: 'section-title', text: 'AL ZUKHRUF (THE ADORNMENT)' },
+                { type: 'text', text: '(Revealed at Mecca - 89 verses)' },
+                { type: 'arabic', text: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ' },
+                { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+
+      { type: 'arabic', text: 'حـمۤ' },
+      { type: 'text', text: '1] Ha-Meem. (Alphabets of the Arabic language - Allah, and to whomever He reveals, know their precise meanings.)' },
+      { type: 'arabic', text: 'وَ الْكِتٰبِ الْمُبِيْنِۙ' },
+      { type: 'text', text: '2] By oath of the clear Qur’an.' },
+      { type: 'arabic', text: 'اِنَّا جَعَلْنٰهُ قُرْاٰنًا عَرَبِيًّا لَّعَلَّكُمْ تَعْقِلُوْنَۚ' },
+      { type: 'text', text: '3] We have indeed sent it as a Qur’an in the Arabic language, so that you may understand.' },
+      { type: 'arabic', text: 'وَ اِنَّهٗ فِیْۤ اُمِّ الْكِتٰبِ لَدَيْنَا لَعَلِیٌّ حَكِيْمٌؕ' },
+      { type: 'text', text: '4] And the Qur’an is undoubtedly, in the Original Book with Us, surely the exalted, full of wisdom.' },
+      { type: 'arabic', text: 'اَفَنَضْرِبُ عَنْكُمُ الذِّكْرَ صَفْحًا اَنْ كُنْتُمْ قَوْمًا مُّسْرِفِيْنَ' },
+      { type: 'text', text: '5] So shall We divert the advice away from you, because you are a nation that exceeds the limits?' },
+      { type: 'arabic', text: 'وَ كَمْ اَرْسَلْنَا مِنْ نَّبِیٍّ فِی الْاَوَّلِيْنَ' },
+      { type: 'text', text: '6] And how many Prophets We did send among the earlier people!' },
+      { type: 'arabic', text: 'وَ مَا يَاْتِيْهِمْ مِّنْ نَّبِیٍّ اِلَّا كَانُوْا بِهٖ يَسْتَهْزِءُوْنَ' },
+      { type: 'text', text: '7] And whenever any Prophet came to them, they only mocked at him.' },
+      { type: 'arabic', text: 'فَاَهْلَكْنَاۤ اَشَدَّ مِنْهُمْ بَطْشًا وَّ مَضٰى مَثَلُ الْاَوَّلِيْنَ' },
+      { type: 'text', text: '8] We therefore destroyed the people who were more forceful than these, and the example of the earlier ones has already gone by.' },
+      { type: 'arabic', text: 'وَ لَىِٕنْ سَاَلْتَهُمْ مَّنْ خَلَقَ السَّمٰوٰتِ وَ الْاَرْضَ لَيَقُوْلُنَّ خَلَقَهُنَّ الْعَزِيْزُ الْعَلِيْمُۙ' },
+      { type: 'text', text: '9] And if you ask them, “Who has created the heavens and the earth?”, they will surely say, “They are created by the Most Honourable, the All Knowing.”' },
+      { type: 'arabic', text: 'الَّذِیْ جَعَلَ لَكُمُ الْاَرْضَ مَهْدًا وَّ جَعَلَ لَكُمْ فِيْهَا سُبُلًا لَّعَلَّكُمْ تَهْتَدُوْنَۚ' },
+      { type: 'text', text: '10] The One Who made the earth a bed you, and made roads for you in it, so that you may be guided.' },
+      { type: 'arabic', text: 'وَ الَّذِیْ نَزَّلَ مِنَ السَّمَآءِ مَآءًۢ بِقَدَرٍۚ فَاَنْشَرْنَا بِهٖ بَلْدَةً مَّيْتًاۚ كَذٰلِكَ تُخْرَجُوْنَ' },
+      { type: 'text', text: '11] And Who sent down water from the sky with a proper measure, so We revived a dead city with it; this is how you will be taken out.' },
+      { type: 'arabic', text: 'وَ الَّذِیْ خَلَقَ الْاَزْوَاجَ كُلَّهَا وَ جَعَلَ لَكُمْ مِّنَ الْفُلْكِ وَ الْاَنْعَامِ مَا تَرْكَبُوْنَۙ' },
+      { type: 'text', text: '12] And the One Who created all pairs, and made the ships and cattle as rides for you.' },
+      { type: 'arabic', text: 'لِتَسْتَوٗا عَلٰى ظُهُوْرِهٖ ثُمَّ تَذْكُرُوْا نِعْمَةَ رَبِّكُمْ اِذَا اسْتَوَيْتُمْ عَلَيْهِ وَ تَقُوْلُوْا سُبْحٰنَ الَّذِیْ سَخَّرَ لَنَا هٰذَا وَ مَا كُنَّا لَهٗ مُقْرِنِيْنَۙ' },
+      { type: 'text', text: '13] So that you may properly mount their backs, and may remember your Lord’s favour when you have mounted them, and say, “Purity is to Him, Who has given this ride in our control, and we did not have the strength for it.”' },
+      { type: 'arabic', text: 'وَ اِنَّاۤ اِلٰى رَبِّنَا لَمُنْقَلِبُوْنَ' },
+      { type: 'text', text: '14] “And indeed we have to return to our Lord.”' },
+      { type: 'arabic', text: 'وَ جَعَلُوْا لَهٗ مِنْ عِبَادِهٖ جُزْءًاؕ اِنَّ الْاِنْسَانَ لَكَفُوْرٌ مُّبِيْنٌ' },
+      { type: 'text', text: '15] And from His bondmen, they appointed a portion for Him; man is indeed an open ingrate.' },
+      { type: 'arabic', text: 'اَمِ اتَّخَذَ مِمَّا يَخْلُقُ بَنٰتٍ وَّ اَصْفٰىكُمْ بِالْبَنِيْنَ' },
+      { type: 'text', text: '16] Has He chosen daughters for Himself from His creation, and selected only sons for you?' },
+      { type: 'arabic', text: 'وَ اِذَا بُشِّرَ اَحَدُهُمْ بِمَا ضَرَبَ لِلرَّحْمٰنِ مَثَلًا ظَلَّ وَجْهُهٗ مُسْوَدًّا وَّ هُوَ كَظِيْمٌ' },
+      { type: 'text', text: '17] And if one of them is given the glad tidings of what he professes regarding the Most Gracious, his face blackens and he is mournful!' },
+      { type: 'arabic', text: 'اَوَ مَنْ يُّنَشَّؤُا فِی الْحِلْيَةِ وَ هُوَ فِی الْخِصَامِ غَيْرُ مُبِيْنٍ' },
+      { type: 'text', text: '18] And (do they chose for Him) one who is brought up among ornaments, and cannot express herself clearly in debate?' },
+      { type: 'arabic', text: 'وَ جَعَلُوا الْمَلٰٓئِكَةَ الَّذِيْنَ هُمْ عِبٰدُ الرَّحْمٰنِ اِنَاثًاؕ اَشَهِدُوْا خَلْقَهُمْؕ سَتُكْتَبُ شَهَادَتُهُمْ وَ يُسْـَٔلُوْنَ' },
+      { type: 'text', text: '19] And they appoint the angels, who are the bondmen of the Most Gracious, as females; were they present at the time of the angels’ creation? Their declaration will be now recorded and they will be questioned.' },
+      { type: 'arabic', text: 'وَ قَالُوْا لَوْ شَآءَ الرَّحْمٰنُ مَا عَبَدْنٰهُمْؕ مَا لَهُمْ بِذٰلِكَ مِنْ عِلْمٍ اِنْ هُمْ اِلَّا يَخْرُصُوْنَؕ' },
+      { type: 'text', text: '20] And they say, “If the Most Gracious had willed, we would not have worshipped them!” They do not know its truth at all; they only make guesses.' },
+      { type: 'arabic', text: 'اَمْ اٰتَيْنٰهُمْ كِتٰبًا مِّنْ قَبْلِهٖ فَهُمْ بِهٖ مُسْتَمْسِكُوْنَ' },
+      { type: 'text', text: '21] Or have We given them some Book before this, to which they hold fast?' },
+      { type: 'arabic', text: 'بَلْ قَالُوْا اِنَّا وَجَدْنَاۤ اٰبَآءَنَا عَلٰى اُمَّةٍ وَّ اِنَّا عَلٰى اٰثٰرِهِمْ مُّهْتَدُوْنَ' },
+      { type: 'text', text: '22] Rather they said, “We found our forefathers upon a religion, and we are following their footsteps.”' },
+      { type: 'arabic', text: 'وَ كَذٰلِكَ مَاۤ اَرْسَلْنَا مِنْ قَبْلِكَ فِیْ قَرْيَةٍ مِّنْ نَّذِيْرٍ اِلَّا قَالَ مُتْرَفُوْهَاۤ اِنَّا وَجَدْنَاۤ اٰبَآءَنَا عَلٰى اُمَّةٍ وَّ اِنَّا عَلٰى اٰثٰرِهِمْ مُّقْتَدُوْنَ' },
+      { type: 'text', text: '23] And similarly, whenever We sent a Herald of Warning before you (O dear Prophet Mohammed - peace and blessings be upon him) into any town, its wealthy people said, “We found our forefathers upon a religion, and we are following their footsteps.”' },
+      { type: 'arabic', text: 'قٰلَ اَوَلَوْ جِئْتُكُمْ بِاَهْدٰى مِمَّا وَجَدْتُّمْ عَلَيْهِ اٰبَآءَكُمْؕ قَالُوْا اِنَّا بِمَاۤ اُرْسِلْتُمْ بِهٖ كٰفِرُوْنَ' },
+      { type: 'text', text: '24] The prophet said, “What! Even if I bring to you a path better than what you found your forefathers following?”; they said, “We do not believe in whatever you have been sent with.”' },
+      { type: 'arabic', text: 'فَانْتَقَمْنَا مِنْهُمْ فَانْظُرْ كَيْفَ كَانَ عَاقِبَةُ الْمُكَذِّبِيْنَ' },
+      { type: 'text', text: '25] So We took revenge from them - therefore see what sort of fate befell those who denied!' },
+      { type: 'arabic', text: 'وَ اِذْ قَالَ اِبْرٰهِيْمُ لِاَبِيْهِ وَ قَوْمِهٖۤ اِنَّنِیْ بَرَآءٌ مِّمَّا تَعْبُدُوْنَۙ' },
+      { type: 'text', text: '26] And when Ibrahim said to his father and his people, “I have no relation whatsoever with your deities.”' },
+      { type: 'arabic', text: 'اِلَّا الَّذِیْ فَطَرَنِیْ فَاِنَّهٗ سَيَهْدِيْنِ' },
+      { type: 'text', text: '27] “Except Him Who has created me, for He will soon direct me.” (To my place of migration.)' },
+      { type: 'arabic', text: 'وَ جَعَلَهَا كَلِمَةًۢ بَاقِيَةً فِیْ عَقِبِهٖ لَعَلَّهُمْ يَرْجِعُوْنَ' },
+      { type: 'text', text: '28] And Ibrahim kept this declaration among his progeny, in order that they may desist.' },
+      { type: 'arabic', text: 'بَلْ مَتَّعْتُ هٰۤؤُلَآءِ وَ اٰبَآءَهُمْ حَتّٰى جَآءَهُمُ الْحَقُّ وَ رَسُوْلٌ مُّبِيْنٌ' },
+      { type: 'text', text: '29] In fact I gave them and their forefathers the usage of this world until the truth and the Noble Messenger who conveyed the message clearly, came to them.' },
+      { type: 'arabic', text: 'وَ لَمَّا جَآءَهُمُ الْحَقُّ قَالُوْا هٰذَا سِحْرٌ وَّ اِنَّا بِهٖ كٰفِرُوْنَ' },
+      { type: 'text', text: '30] And when the truth came to them they said, “This is magic, and we disbelieve in it.”' },
+      { type: 'arabic', text: 'وَ قَالُوْا لَوْ لَا نُزِّلَ هٰذَا الْقُرْاٰنُ عَلٰى رَجُلٍ مِّنَ الْقَرْيَتَيْنِ عَظِيْمٍ' },
+      { type: 'text', text: '31] And they said, “Why was the Qur’an not sent down upon some chieftain of these two great towns?” (The chiefs of Mecca and Taif).' },
+      { type: 'arabic', text: 'اَهُمْ يَقْسِمُوْنَ رَحْمَتَ رَبِّكَؕ نَحْنُ قَسَمْنَا بَيْنَهُمْ مَّعِيْشَتَهُمْ فِی الْحَيٰوةِ الدُّنْيَاۙ وَ رَفَعْنَا بَعْضَهُمْ فَوْقَ بَعْضٍ دَرَجٰتٍ لِّيَتَّخِذَ بَعْضُهُمْ بَعْضًا سُخْرِيًّاؕ وَ رَحْمَتُ رَبِّكَ خَيْرٌ مِّمَّا يَجْمَعُوْنَ' },
+      { type: 'text', text: '32] Are they the distributors of your Lord’s mercy? We have distributed among them their comforts in the life of this world, and gave high status to some over others so that they mock at each other; and the mercy of your Lord is better than all what they hoard.' },
+      { type: 'arabic', text: 'وَ لَوْ لَاۤ اَنْ يَّكُوْنَ النَّاسُ اُمَّةً وَّاحِدَةً لَّجَعَلْنَا لِمَنْ يَّكْفُرُ بِالرَّحْمٰنِ لِبُيُوْتِهِمْ سُقُفًا مِّنْ فِضَّةٍ وَّ مَعَارِجَ عَلَيْهَا يَظْهَرُوْنَۙ' },
+      { type: 'text', text: '33] And were it not for that all people be on one religion, We would have made for the disbelievers of the Most Gracious, roofs and stairs of silver which they would climb.' },
+      { type: 'arabic', text: 'وَ لِبُيُوْتِهِمْ اَبْوَابًا وَّ سُرُرًا عَلَيْهَا يَتَّكِـُٔوْنَۙ' },
+      { type: 'text', text: '34] And doors of silver for their houses and couches of silver upon which they would recline.' },
+      { type: 'arabic', text: 'وَ زُخْرُفًاؕ وَ اِنْ كُلُّ ذٰلِكَ لَمَّا مَتَاعُ الْحَيٰوةِ الدُّنْيَاؕ وَ الْاٰخِرَةُ عِنْدَ رَبِّكَ لِلْمُتَّقِيْنَ' },
+      { type: 'text', text: '35] And diverse adornments; and all this is usage only of the life of this world; and the Hereafter with your Lord, is for the pious.' },
+      { type: 'arabic', text: 'وَ مَنْ يَّعْشُ عَنْ ذِكْرِ الرَّحْمٰنِ نُقَيِّضْ لَهٗ شَيْطٰنًا فَهُوَ لَهٗ قَرِيْنٌ' },
+      { type: 'text', text: '36] And whoever is averse to the Remembrance of the Most Gracious, We appoint a devil upon him, who stays with him.' },
+      { type: 'arabic', text: 'وَ اِنَّهُمْ لَيَصُدُّوْنَهُمْ عَنِ السَّبِيْلِ وَ يَحْسَبُوْنَ اَنَّهُمْ مُّهْتَدُوْنَ' },
+      { type: 'text', text: '37] And indeed those devils prevent them from the Straight Path, and they think they are on guidance!' },
+      { type: 'arabic', text: 'حَتّٰۤى اِذَا جَآءَنَا قَالَ يٰلَيْتَ بَيْنِیْ وَ بَيْنَكَ بُعْدَ الْمَشْرِقَيْنِ فَبِئْسَ الْقَرِيْنُ' },
+      { type: 'text', text: '38] To the extent that when the disbeliever will be brought to Us, he will say to his devil, “Alas - if only there was the distance* of east and west, between you and me!” - so what an evil companion** he is! (* Had I not listened to you. **They will be bound together in chains.)' },
+      { type: 'arabic', text: 'وَ لَنْ يَّنْفَعَكُمُ الْيَوْمَ اِذْ ظَّلَمْتُمْ اَنَّكُمْ فِی الْعَذَابِ مُشْتَرِكُوْنَ' },
+      { type: 'text', text: '39] (It will be said to them) “And you will not benefit from them this day, whereas you are unjust - for you are all partners in the punishment.”' },
+      { type: 'arabic', text: 'اَفَاَنْتَ تُسْمِعُ الصُّمَّ اَوْ تَهْدِی الْعُمْیَ وَ مَنْ كَانَ فِیْ ضَلٰلٍ مُّبِيْنٍ' },
+      { type: 'text', text: '40] So will you make the deaf listen or show the path to the blind, and to those who are in open error? (The disbelievers whose hearts are sealed, are deaf and blind to the truth).' },
+      { type: 'arabic', text: 'فَاِمَّا نَذْهَبَنَّ بِكَ فَاِنَّا مِنْهُمْ مُّنْتَقِمُوْنَۙ' },
+      { type: 'text', text: '41] So if We take you away, We shall then indeed take revenge from them.' },
+      { type: 'arabic', text: 'اَوْ نُرِيَنَّكَ الَّذِیْ وَعَدْنٰهُمْ فَاِنَّا عَلَيْهِمْ مُّقْتَدِرُوْنَ' },
+      { type: 'text', text: '42] Or show you what We have promised them - We therefore have complete control over them.' },
+      { type: 'arabic', text: 'فَاسْتَمْسِكْ بِالَّذِیْۤ اُوْحِیَ اِلَيْكَۚ اِنَّكَ عَلٰى صِرَاطٍ مُّسْتَقِيْمٍ' },
+      { type: 'text', text: '43] Therefore hold fast to what We have divinely revealed to you; indeed you are upon the Straight Path. (The Holy Prophets can never go astray).' },
+      { type: 'arabic', text: 'وَ اِنَّهٗ لَذِكْرٌ لَّكَ وَ لِقَوْمِكَۚ وَ سَوْفَ تُسْـَٔلُوْنَ' },
+      { type: 'text', text: '44] And it is undoubtedly an honour for you and your people; and you will soon be questioned.' },
+      { type: 'arabic', text: 'وَ سْـَٔلْ مَنْ اَرْسَلْنَا مِنْ قَبْلِكَ مِنْ رُّسُلِنَاۤ اَجَعَلْنَا مِنْ دُوْنِ الرَّحْمٰنِ اٰلِهَةً يُّعْبَدُوْنَ' },
+      { type: 'text', text: '45] And ask them - did any of the Noble Messengers We sent before you, appoint any other Gods except the Most Gracious, whom they used to worship?' },
+      { type: 'arabic', text: 'وَ لَقَدْ اَرْسَلْنَا مُوْسٰى بِاٰيٰتِنَاۤ اِلٰى فِرْعَوْنَ وَ مَلَاِئِهٖ فَقَالَ اِنِّیْ رَسُوْلُ رَبِّ الْعٰلَمِيْنَ' },
+      { type: 'text', text: '46] And indeed We sent Moosa along with Our signs towards Firaun and his chieftains - he therefore said, “Indeed I am a Noble Messenger of the Lord of the Creation.”' },
+      { type: 'arabic', text: 'فَلَمَّا جَآءَهُمْ بِاٰيٰتِنَاۤ اِذَا هُمْ مِّنْهَا يَضْحَكُوْنَ' },
+      { type: 'text', text: '47] So when he brought Our signs to them, they started mocking at them!' },
+      { type: 'arabic', text: 'وَ مَا نُرِيْهِمْ مِّنْ اٰيَةٍ اِلَّا هِیَ اَكْبَرُ مِنْ اُخْتِهَاۚ وَ اَخَذْنٰهُمْ بِالْعَذَابِ لَعَلَّهُمْ يَرْجِعُوْنَ' },
+      { type: 'text', text: '48] And all the signs We showed them were always greater than the earlier ones; and We seized them with calamities, so that they may return.' },
+      { type: 'arabic', text: 'وَ قَالُوْا يٰۤاَيُّهَ السَّاحِرُ ادْعُ لَنَا رَبَّكَ بِمَا عَهِدَ عِنْدَكَۙ اِنَّا لَمُهْتَدُوْنَ' },
+      { type: 'text', text: '49] And they said, “O you magician! Pray for us to your Lord, by the means of His covenant which is with you; we will certainly come to guidance.”' },
+      { type: 'arabic', text: 'فَلَمَّا كَشَفْنَا عَنْهُمُ الْعَذَابَ اِذَا هُمْ يَنْكُثُوْنَ' },
+      { type: 'text', text: '50] So when We averted the calamity from them, they immediately broke the promise!' },
+      { type: 'arabic', text: 'وَ نَادٰى فِرْعَوْنُ فِیْ قَوْمِهٖ قَالَ يٰقَوْمِ اَلَيْسَ لِیْ مُلْكُ مِصْرَ وَ هٰذِهِ الْاَنْهٰرُ تَجْرِیْ مِنْ تَحْتِیْۚ اَفَلَا تُبْصِرُوْنَ' },
+      { type: 'text', text: '51] And said Firaun, “O my people! Is not the kingdom of Egypt for me, and these rivers that flow beneath me? So do you not see?”' },
+      { type: 'arabic', text: 'اَمْ اَنَا خَيْرٌ مِّنْ هٰذَا الَّذِیْ هُوَ مَهِيْنٌ وَّ لَا يَكَادُ يُبِيْنُ' },
+      { type: 'text', text: '52] “Or that I am better than him, for he is lowly - and he does not seem to talk plainly.”' },
+      { type: 'arabic', text: 'فَلَوْ لَاۤ اُلْقِیَ عَلَيْهِ اَسْوِرَةٌ مِّنْ ذَهَبٍ اَوْ جَآءَ مَعَهُ الْمَلٰٓئِكَةُ مُقْتَرِنِيْنَ' },
+      { type: 'text', text: '53] “So why was he not bestowed with armlets of gold? Or angels should have come with him staying at his side!”' },
+      { type: 'arabic', text: 'فَاسْتَخَفَّ قَوْمَهٗ فَاَطَاعُوْهُؕ اِنَّهُمْ كَانُوْا قَوْمًا فٰسِقِيْنَ' },
+      { type: 'text', text: '54] So when he had brainwashed his people, they followed him; indeed they were a disobedient nation.' },
+      { type: 'arabic', text: 'فَلَمَّاۤ اٰسَفُوْنَا انْتَقَمْنَا مِنْهُمْ فَاَغْرَقْنٰهُمْ اَجْمَعِيْنَۙ' },
+      { type: 'text', text: '55] So when they made Us wrathful, We took revenge from them - We therefore drowned all of them.' },
+      { type: 'arabic', text: 'فَجَعَلْنٰهُمْ سَلَفًا وَّ مَثَلًا لِّلْاٰخِرِيْنَ' },
+      { type: 'text', text: '56] So We made them a bygone fable and a lesson for the latter generations.' },
+      { type: 'arabic', text: 'وَ لَمَّا ضُرِبَ ابْنُ مَرْيَمَ مَثَلًا اِذَا قَوْمُكَ مِنْهُ يَصِدُّوْنَ' },
+      { type: 'text', text: '57] And when the example of the son of Maryam is given, your people laugh at it!' },
+      { type: 'arabic', text: 'وَ قَالُوْۤا اَءٰالِهَتُنَا خَيْرٌ اَمْ هُوَؕ مَا ضَرَبُوْهُ لَكَ اِلَّا جَدَلًاؕ بَلْ هُمْ قَوْمٌ خَصِمُوْنَ' },
+      { type: 'text', text: '58] And they say, “Are our deities better or he?” They did not say this to you except to unjustly argue; in fact they are a quarrelsome people.' },
+      { type: 'arabic', text: 'اِنْ هُوَ اِلَّا عَبْدٌ اَنْعَمْنَا عَلَيْهِ وَ جَعَلْنٰهُ مَثَلًا لِّبَنِیْۤ اِسْرَآءِيْلَؕ' },
+      { type: 'text', text: '59] He is purely a bondman (of Ours), whom We have favoured upon, and We made him an extraordinary example for the Descendants of Israel.' },
+      { type: 'arabic', text: 'وَ لَوْ نَشَآءُ لَجَعَلْنَا مِنْكُمْ مَلٰٓئِكَةً فِی الْاَرْضِ يَخْلُفُوْنَ' },
+      { type: 'text', text: '60] And if We willed, We could have established angels on the earth instead of you.' },
+      { type: 'arabic', text: 'وَ اِنَّهٗ لَعِلْمٌ لِّلسَّاعَةِ فَلَا تَمْتَرُنَّ بِهَا وَ اتَّبِعُوْنِؕ هٰذَا صِرَاطٌ مُّسْتَقِيْمٌ' },
+      { type: 'text', text: '61] And indeed Eisa is a sign* of the Last Day, therefore do not ever doubt in the Last Day, and obey Me**; this is the Straight Path. (* The advent of Prophet Eisa to earth for the second time. ** By obeying the Noble Messenger.)' },
+      { type: 'arabic', text: 'وَ لَا يَصُدَّنَّكُمُ الشَّيْطٰنُۚ اِنَّهٗ لَكُمْ عَدُوٌّ مُّبِيْنٌ' },
+      { type: 'text', text: '62] And do not ever let the devil stop you; he is indeed your open enemy.' },
+      { type: 'arabic', text: 'وَ لَمَّا جَآءَ عِيْسٰى بِالْبَيِّنٰتِ قَالَ قَدْ جِئْتُكُمْ بِالْحِكْمَةِ وَ لِاُبَيِّنَ لَكُمْ بَعْضَ الَّذِیْ تَخْتَلِفُوْنَ فِيْهِۚ فَاتَّقُوا اللّٰهَ وَ اَطِيْعُوْنِ' },
+      { type: 'text', text: '63] And when Eisa came to them with clear signs, he said, “I have come to you with wisdom, and to explain to you some of the matters regarding which you dispute; therefore fear Allah, and obey me.”' },
+      { type: 'arabic', text: 'اِنَّ اللّٰهَ هُوَ رَبِّیْ وَ رَبُّكُمْ فَاعْبُدُوْهُؕ هٰذَا صِرَاطٌ مُّسْتَقِيْمٌ' },
+      { type: 'text', text: '64] “Allah is indeed my Lord, and yours - therefore worship Him; this is the Straight Path.”' },
+      { type: 'arabic', text: 'فَاخْتَلَفَ الْاَحْزَابُ مِنْۢ بَيْنِهِمْۚ فَوَيْلٌ لِّلَّذِيْنَ ظَلَمُوْا مِنْ عَذَابِ يَوْمٍ اَلِيْمٍ' },
+      { type: 'text', text: '65] Then the groups differed amongst themselves; therefore ruin is for the unjust by the punishment of an agonising day.' },
+      { type: 'arabic', text: 'هَلْ يَنْظُرُوْنَ اِلَّا السَّاعَةَ اَنْ تَاْتِيَهُمْ بَغْتَةً وَّ هُمْ لَا يَشْعُرُوْنَ' },
+      { type: 'text', text: '66] What are they waiting for - except the Last Day, that it may suddenly come upon them while they are unaware?' },
+      { type: 'arabic', text: 'اَلْاَخِلَّآءُ يَوْمَئِذٍۢ بَعْضُهُمْ لِبَعْضٍ عَدُوٌّ اِلَّا الْمُتَّقِيْنَ' },
+      { type: 'text', text: '67] Close friends will turn into enemies of one another on that Day, except the pious.' },
+      { type: 'arabic', text: 'يٰعِبَادِ لَا خَوْفٌ عَلَيْكُمُ الْيَوْمَ وَ لَاۤ اَنْتُمْ تَحْزَنُوْنَۚ' },
+      { type: 'text', text: '68] To such will be said, “O My bondmen! This day there shall be no fear upon you, nor any grief.”' },
+      { type: 'arabic', text: 'الَّذِيْنَ اٰمَنُوْا بِاٰيٰتِنَا وَ كَانُوْا مُسْلِمِيْنَۚ' },
+      { type: 'text', text: '69] Those who believed in Our signs, and were Muslims.' },
+      { type: 'arabic', text: 'ادْخُلُوا الْجَنَّةَ اَنْتُمْ وَ اَزْوَاجُكُمْ تُحْبَرُوْنَ' },
+      { type: 'text', text: '70] “Enter Paradise - you and your wives - and you will be honoured guests.”' },
+      { type: 'arabic', text: 'يُطَافُ عَلَيْهِمْ بِصِحَافٍ مِّنْ ذَهَبٍ وَّ اَكْوَابٍۚ وَ فِيْهَا مَا تَشْتَهِيْهِ الْاَنْفُسُ وَ تَلَذُّ الْاَعْيُنُۚ وَ اَنْتُمْ فِيْهَا خٰلِدُوْنَۚ' },
+      { type: 'text', text: '71] “Rounds of golden cups and wine will be presented upon them; and in it is whatever the hearts wish for, and what pleases the eye; and you will stay in it forever.”' },
+      { type: 'arabic', text: 'وَ تِلْكَ الْجَنَّةُ الَّتِیْۤ اُوْرِثْتُمُوْهَا بِمَا كُنْتُمْ تَعْمَلُوْنَ' },
+      { type: 'text', text: '72] “And this is the Paradise which is bequeathed to you, because of your deeds.”' },
+      { type: 'arabic', text: 'لَكُمْ فِيْهَا فَاكِهَةٌ كَثِيْرَةٌ مِّنْهَا تَاْكُلُوْنَ' },
+      { type: 'text', text: '73] “For you are many fruits in it, for you to eat therefrom.”' },
+      { type: 'arabic', text: 'اِنَّ الْمُجْرِمِيْنَ فِیْ عَذَابِ جَهَنَّمَ خٰلِدُوْنَۚ' },
+      { type: 'text', text: '74] Indeed the criminals will stay in the punishment of hell forever.' },
+      { type: 'arabic', text: 'لَا يُفَتَّرُ عَنْهُمْ وَ هُمْ فِيْهِ مُبْلِسُوْنَ' },
+      { type: 'text', text: '75] And it will never be lightened upon them, and they will remain in it devastated.' },
+      { type: 'arabic', text: 'وَ مَا ظَلَمْنٰهُمْ وَ لٰكِنْ كَانُوْا هُمُ الظّٰلِمِيْنَ' },
+      { type: 'text', text: '76] And We did not oppress them at all, but they themselves were unjust.' },
+      { type: 'arabic', text: 'وَ نَادَوْا يٰمٰلِكُ لِيَقْضِ عَلَيْنَا رَبُّكَؕ قَالَ اِنَّكُمْ مَّاكِثُوْنَ' },
+      { type: 'text', text: '77] And they will cry out, “O Malik*, ask your Lord to finish us!” He will answer, “Rather you are to stay (forever).” (*The guard of hell)' },
+      { type: 'arabic', text: 'لَقَدْ جِئْنٰكُمْ بِالْحَقِّ وَ لٰكِنَّ اَكْثَرَكُمْ لِلْحَقِّ كٰرِهُوْنَ' },
+      { type: 'text', text: '78] Indeed We have brought the Truth to you, but most of you detest the Truth.' },
+      { type: 'arabic', text: 'اَمْ اَبْرَمُوْۤا اَمْرًا فَاِنَّا مُبْرِمُوْنَۚ' },
+      { type: 'text', text: '79] Do they assume that they have made their work thorough? So We shall make Our work thorough.' },
+      { type: 'arabic', text: 'اَمْ يَحْسَبُوْنَ اَنَّا لَا نَسْمَعُ سِرَّهُمْ وَ نَجْوٰىهُمْؕ بَلٰى وَ رُسُلُنَا لَدَيْهِمْ يَكْتُبُوْنَ' },
+      { type: 'text', text: '80] Do they fancy that We do not listen to their whispers and their counselling? Why not, We surely do! And Our angels are with them, writing down.' },
+      { type: 'arabic', text: 'قُلْ اِنْ كَانَ لِلرَّحْمٰنِ وَلَدٌ فَاَنَا اَوَّلُ الْعٰبِدِيْنَ' },
+      { type: 'text', text: '81] Proclaim (O dear Prophet Mohammed - peace and blessings be upon him), “If supposedly, the Most Gracious had an offspring* - I would be the first to worship!” (*Which is impossible)' },
+      { type: 'arabic', text: 'سُبْحٰنَ رَبِّ السَّمٰوٰتِ وَ الْاَرْضِ رَبِّ الْعَرْشِ عَمَّا يَصِفُوْنَ' },
+      { type: 'text', text: '82] Purity is to the Lord of the heavens and the earth, the Lord of the Throne, from all what they fabricate.' },
+      { type: 'arabic', text: 'فَذَرْهُمْ يَخُوْضُوْا وَ يَلْعَبُوْا حَتّٰى يُلٰقُوْا يَوْمَهُمُ الَّذِیْ يُوْعَدُوْنَ' },
+      { type: 'text', text: '83] Therefore leave them to utter vile speech and to play, until they confront the day which they are promised.' },
+      { type: 'arabic', text: 'وَ هُوَ الَّذِیْ فِی السَّمَآءِ اِلٰهٌ وَّ فِی الْاَرْضِ اِلٰهٌؕ وَ هُوَ الْحَكِيْمُ الْعَلِيْمُ' },
+      { type: 'text', text: '84] And only He is the God of the heavenly creation and the God of the earthly creation; and He only is the Wise, the All Knowing.' },
+      { type: 'arabic', text: 'وَ تَبٰرَكَ الَّذِیْ لَهٗ مُلْكُ السَّمٰوٰتِ وَ الْاَرْضِ وَ مَا بَيْنَهُمَاۚ وَ عِنْدَهٗ عِلْمُ السَّاعَةِۚ وَ اِلَيْهِ تُرْجَعُوْنَ' },
+      { type: 'text', text: '85] And Most Auspicious is He, for Whom is the kingship of the heavens and the earth and all that is between them; and only with Him is the knowledge of the Last Day; and towards Him you are to return.' },
+      { type: 'arabic', text: 'وَ لَا يَمْلِكُ الَّذِيْنَ يَدْعُوْنَ مِنْ دُوْنِهِ الشَّفَاعَةَ اِلَّا مَنْ شَهِدَ بِالْحَقِّ وَ هُمْ يَعْلَمُوْنَ' },
+      { type: 'text', text: '86] And those whom they worship besides Allah do not have the right of intercession - the right of intercession is only for those who testify to the Truth and have knowledge.' },
+      { type: 'arabic', text: 'وَ لَىِٕنْ سَاَلْتَهُمْ مَّنْ خَلَقَهُمْ لَيَقُوْلُنَّ اللّٰهُ فَاَنّٰى يُؤْفَكُوْنَ' },
+      { type: 'text', text: '87] And if you ask them as to Who created them, they will surely answer “Allah” - so where are they reverting?' },
+      { type: 'arabic', text: 'وَ قِيْلِهٖ يٰرَبِّ اِنَّ هٰۤؤُلَآءِ قَوْمٌ لَّا يُؤْمِنُوْنَۘ' },
+      { type: 'text', text: '88] And by oath of the saying of My Prophet “O my Lord! These people do not accept faith!”' },
+      { type: 'arabic', text: 'فَاصْفَحْ عَنْهُمْ وَ قُلْ سَلٰمٌؕ فَسَوْفَ يَعْلَمُوْنَ' },
+                { type: 'text', text: '89] Therefore excuse them and proclaim, “Peace”; for they will soon come to know.' }
+            ]
+        },
+
+        {
+            id: 44, name: "AL DUKHAN", ar: "الدخان", juz: 25,
+            audio: 'https://server10.mp3quran.net/minsh/044.mp3',
+            content: [
+                { type: 'section-title', text: 'AL DUKHAN (THE SMOKE)' },
+                { type: 'text', text: '(Revealed at Mecca - 59 verses)' },
+ { type: 'arabic', text: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ' },
+      { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'حـمۤ' },
+      { type: 'text', text: '1] Ha-Meem. (Alphabets of the Arabic language - Allah, and to whomever He reveals, know their precise meanings.)' },
+      { type: 'arabic', text: 'وَ الْكِتٰبِ الْمُبِيْنِۙ' },
+      { type: 'text', text: '2] By oath of this clear Book.' },
+      { type: 'arabic', text: 'اِنَّاۤ اَنْزَلْنٰهُ فِيْ لَيْلَةٍ مُّبٰرَكَةٍ اِنَّا كُنَّا مُنْذِرِيْنَ' },
+      { type: 'text', text: '3] We have indeed sent it down in a blessed night - indeed it is We Who warn.' },
+      { type: 'arabic', text: 'فِيْهَا يُفْرَقُ كُلُّ اَمْرٍ حَكِيْمٍۙ' },
+      { type: 'text', text: '4] During it are distributed all the works of wisdom.' },
+      { type: 'arabic', text: 'اَمْرًا مِّنْ عِنْدِنَاؕ اِنَّا كُنَّا مُرْسِلِيْنَۚ' },
+      { type: 'text', text: '5] By a command from Us - indeed it is We Who send.' },
+      { type: 'arabic', text: 'رَحْمَةً مِّنْ رَّبِّكَؕ اِنَّهٗ هُوَ السَّمِيْعُ الْعَلِيْمُۙ' },
+      { type: 'text', text: '6] A mercy from your Lord; indeed He only is the All Hearing, the All Knowing.' },
+      { type: 'arabic', text: 'رَبِّ السَّمٰوٰتِ وَ الْاَرْضِ وَ مَا بَيْنَهُمَاؕ اِنْ كُنْتُمْ مُّوْقِنِيْنَ' },
+      { type: 'text', text: '7] The Lord of the heavens and the earth and all that is between them; if you people believe.' },
+      { type: 'arabic', text: 'لَاۤ اِلٰهَ اِلاَّ هُوَ يُحْیٖ وَ يُمِيْتُؕ رَبُّكُمْ وَ رَبُّ اٰبَآئِكُمُ الْاَوَّلِيْنَ' },
+      { type: 'text', text: '8] There is no worship except for Him - He gives life and causes death; your Lord and the Lord of your forefathers.' },
+      { type: 'arabic', text: 'بَلْ هُمْ فِیْ شَكٍّ يَّلْعَبُوْنَ' },
+      { type: 'text', text: '9] Rather they are in doubt, playing.' },
+      { type: 'arabic', text: 'فَارْتَقِبْ يَوْمَ تَاْتِی السَّمَآءُ بِدُخَانٍ مُّبِيْنٍۙ' },
+      { type: 'text', text: '10] So you await the day when the sky will bring forth a visible smoke. -' },
+      { type: 'arabic', text: 'يَّغْشَى النَّاسَؕ هٰذَا عَذَابٌ اَلِيْمٌ' },
+      { type: 'text', text: '11] Which will envelop the people; this is a painful punishment.' },
+      { type: 'arabic', text: 'رَبَّنَا اكْشِفْ عَنَّا الْعَذَابَ اِنَّا مُؤْمِنُوْنَ' },
+      { type: 'text', text: '12] Thereupon they will say, “O our Lord! Remove the punishment from us - we now accept faith.”' },
+      { type: 'arabic', text: 'اَنّٰى لَهُمُ الذِّكْرٰى وَ قَدْ جَآءَهُمْ رَسُوْلٌ مُّبِيْنٌۙ' },
+      { type: 'text', text: '13] How is it possible for them to accept guidance, whereas a Noble Messenger who speaks clearly has already come to them?' },
+      { type: 'arabic', text: 'ثُمَّ تَوَلَّوْا عَنْهُ وَ قَالُوْا مُعَلَّمٌ مَّجْنُوْنٌۘ' },
+      { type: 'text', text: '14] Whereas they had then turned away from him and said, “He is a madman, tutored!”?' },
+      { type: 'arabic', text: 'اِنَّا كَاشِفُوا الْعَذَابِ قَلِيْلًا اِنَّكُمْ عَآئِدُوْنَۘ' },
+      { type: 'text', text: '15] We now remove the punishment for some days - so you will again commit the same.' },
+      { type: 'arabic', text: 'يَوْمَ نَبْطِشُ الْبَطْشَةَ الْكُبْرٰىۚ اِنَّا مُنْتَقِمُوْنَ' },
+      { type: 'text', text: '16] The day when We will seize with the greatest seizure - We will indeed take revenge.' },
+      { type: 'arabic', text: 'وَ لَقَدْ فَتَنَّا قَبْلَهُمْ قَوْمَ فِرْعَوْنَ وَ جَآءَهُمْ رَسُوْلٌ كَرِيْمٌۙ' },
+      { type: 'text', text: '17] And before them We indeed tried the people of Firaun, and an Honourable Noble Messenger came to them.' },
+      { type: 'arabic', text: 'اَنْ اَدُّوْۤا اِلَیَّ عِبَادَ اللّٰهِؕ اِنِّیْ لَكُمْ رَسُوْلٌ اَمِيْنٌۙ' },
+      { type: 'text', text: '18] Who said, “Give the bondmen of Allah into my custody; I am indeed a trustworthy Noble Messenger for you.”' },
+      { type: 'arabic', text: 'وَّ اَنْ لَّا تَعْلُوْا عَلَى اللّٰهِۚ اِنِّیْۤ اٰتِيْكُمْ بِسُلْطٰنٍ مُّبِيْنٍۚ' },
+      { type: 'text', text: '19] And saying, “And do not rebel against Allah; I have brought a clear proof to you.”' },
+      { type: 'arabic', text: 'اِنِّیْ عُذْتُ بِرَبِّیْ وَ رَبِّكُمْ اَنْ تَرْجُمُوْنِۚ' },
+      { type: 'text', text: '20] “And I take the refuge of my Lord and yours, against your stoning me.”' },
+      { type: 'arabic', text: 'وَ اِنْ لَّمْ تُؤْمِنُوْا لِیْ فَاعْتَزِلُوْنِ' },
+      { type: 'text', text: '21] “And if you do not believe in me, then have no relation with me.”' },
+      { type: 'arabic', text: 'فَدَعَا رَبَّهٗۤ اَنَّ هٰۤؤُلَآءِ قَوْمٌ مُّجْرِمُوْنَ' },
+      { type: 'text', text: '22] He therefore prayed to his Lord, “These are a guilty nation!”' },
+      { type: 'arabic', text: 'فَاَسْرِ بِعِبَادِیْ لَيْلًا اِنَّكُمْ مُّتَّبَعُوْنَۙ' },
+      { type: 'text', text: '23] We commanded him, “Journey with My bondmen in a part of the night - you will be pursued.”' },
+      { type: 'arabic', text: 'وَ اتْرُكِ الْبَحْرَ رَهْوًاؕ اِنَّهُمْ جُنْدٌ مُّغْرَقُوْنَ' },
+      { type: 'text', text: '24] “And leave the sea as it is, parted in several places; indeed that army will be drowned.”' },
+      { type: 'arabic', text: 'كَمْ تَرَكُوْا مِنْ جَنّٰتٍ وَّ عُيُوْنٍۙ' },
+      { type: 'text', text: '25] How many gardens and water-springs they left behind!' },
+      { type: 'arabic', text: 'وَّ زُرُوْعٍ وَّ مَقَامٍ كَرِيْمٍۙ' },
+      { type: 'text', text: '26] And fields and grand palaces!' },
+      { type: 'arabic', text: 'وَّ نَعْمَةٍ كَانُوْا فِيْهَا فَاكِهِيْنَۙ' },
+      { type: 'text', text: '27] And favours amongst which they were rejoicing!' },
+      { type: 'arabic', text: 'كَذٰلِكَ وَ اَوْرَثْنٰهَا قَوْمًا اٰخَرِيْنَ' },
+      { type: 'text', text: '28] That is what We did; and We made another nation their heirs.' },
+      { type: 'arabic', text: 'فَمَا بَكَتْ عَلَيْهِمُ السَّمَآءُ وَ الْاَرْضُ وَ مَا كَانُوْا مُنْظَرِيْنَ' },
+      { type: 'text', text: '29] So the heavens and the earth did not weep for them, and they were not given respite.' },
+      { type: 'arabic', text: 'وَ لَقَدْ نَجَّيْنَا بَنِیْۤ اِسْرَآءِيْلَ مِنَ الْعَذَابِ الْمُهِيْنِۙ' },
+      { type: 'text', text: '30] And indeed We rescued the Descendants of Israel from a disgraceful torture.' },
+      { type: 'arabic', text: 'مِنْ فِرْعَوْنَؕ اِنَّهٗ كَانَ عَالِيًا مِّنَ الْمُسْرِفِيْنَ' },
+      { type: 'text', text: '31] From Firaun; he was indeed proud, among the transgressors.' },
+      { type: 'arabic', text: 'وَ لَقَدِ اخْتَرْنٰهُمْ عَلٰى عِلْمٍ عَلَى الْعٰلَمِيْنَۚ' },
+      { type: 'text', text: '32] And We knowingly chose them, among all others of their time.' },
+      { type: 'arabic', text: 'وَ اٰتَيْنٰهُمْ مِّنَ الْاٰيٰتِ مَا فِيْهِ بَلٰٓؤٌا مُّبِيْنٌ' },
+      { type: 'text', text: '33] And We gave them signs in which lay clear favours.' },
+      { type: 'arabic', text: 'اِنَّ هٰۤؤُلَآءِ لَيَقُوْلُوْنَۙ' },
+      { type: 'text', text: '34] Indeed these disbelievers proclaim; -' },
+      { type: 'arabic', text: 'اِنْ هِیَ اِلَّا مَوْتَتُنَا الْاُوْلٰى وَ مَا نَحْنُ بِمُنْشَرِيْنَ' },
+      { type: 'text', text: '35] “There is nothing except our dying just once, and we will not be raised.”' },
+      { type: 'arabic', text: 'فَاْتُوْا بِاٰبَآئِنَاۤ اِنْ كُنْتُمْ صٰدِقِيْنَ' },
+      { type: 'text', text: '36] “Therefore bring back our forefathers, if you are truthful!”' },
+      { type: 'arabic', text: 'اَهُمْ خَيْرٌ اَمْ قَوْمُ تُبَّعٍۙ وَّ الَّذِيْنَ مِنْ قَبْلِهِمْؕ اَهْلَكْنٰهُمْ اِنَّهُمْ كَانُوْا مُجْرِمِيْنَ' },
+      { type: 'text', text: '37] Are they better, or the people of Tubba? And those who were before them? We destroyed them; they were indeed criminals.' },
+      { type: 'arabic', text: 'وَ مَا خَلَقْنَا السَّمٰوٰتِ وَ الْاَرْضِ وَ مَا بَيْنَهُمَا لٰعِبِيْنَ' },
+      { type: 'text', text: '38] And We did not create the heavens and the earth, and all that is between them, just for play.' },
+      { type: 'arabic', text: 'مَا خَلَقْنٰهُمَاۤ اِلَّا بِالْحَقِّ وَ لٰكِنَّ اَكْثَرَهُمْ لَا يَعْلَمُوْنَ' },
+      { type: 'text', text: '39] We did not create them except with the truth, but most of them do not know.' },
+      { type: 'arabic', text: 'اِنَّ يَوْمَ الْفَصْلِ مِيْقَاتُهُمْ اَجْمَعِيْنَۙ' },
+      { type: 'text', text: '40] Indeed the Day of Decision is the appointment for all of them.' },
+      { type: 'arabic', text: 'يَوْمَ لَا يُغْنِیْ مَوْلًى عَنْ مَّوْلًى شَيْئًا وَّ لَا هُمْ يُنْصَرُوْنَۙ' },
+      { type: 'text', text: '41] The day on which, no friends will benefit each other at all, nor will they be helped. (Except those who are pious - see verse 43:67)' },
+      { type: 'arabic', text: 'اِلَّا مَنْ رَّحِمَ اللّٰهُؕ اِنَّهٗ هُوَ الْعَزِيْزُ الرَّحِيْمُ' },
+      { type: 'text', text: '42] Except those upon whom Allah has mercy; indeed He only is the Most Honourable, the Most Merciful.' },
+      { type: 'arabic', text: 'اِنَّ شَجَرَتَ الزَّقُّوْمِۙ' },
+      { type: 'text', text: '43] Indeed the tree of Zaqqum, -' },
+      { type: 'arabic', text: 'طَعَامُ الْاَثِيْمِۚ' },
+      { type: 'text', text: '44] Is the food of the sinners.' },
+      { type: 'arabic', text: 'كَالْمُهْلِ ۚ يَغْلِیْ فِی الْبُطُوْنِۙ' },
+      { type: 'text', text: '45] Like molten copper; it churns in their bellies.' },
+      { type: 'arabic', text: 'كَغَلْیِ الْحَمِيْمِؕ' },
+      { type: 'text', text: '46] Like the churning of boiling water.' },
+      { type: 'arabic', text: 'خُذُوْهُ فَاعْتِلُوْهُ اِلٰى سَوَآءِ الْجَحِيْمِ٘' },
+      { type: 'text', text: '47] “Seize him, and forcibly drag him right to the blazing fire.”' },
+      { type: 'arabic', text: 'ثُمَّ صُبُّوْا فَوْقَ رَاْسِهٖ مِنْ عَذَابِ الْحَمِيْمِؕ' },
+      { type: 'text', text: '48] “Then pour on his head the punishment of boiling water.”' },
+      { type: 'arabic', text: 'ذُقْ ۚ اِنَّكَ اَنْتَ الْعَزِيْزُ الْكَرِيْمُ' },
+      { type: 'text', text: '49] Saying “Taste it! Indeed you only are the most honourable, the dignified!”' },
+      { type: 'arabic', text: 'اِنَّ هٰذَا مَا كُنْتُمْ بِهٖ تَمْتَرُوْنَ' },
+      { type: 'text', text: '50] “Indeed this is what you used to doubt about.”' },
+      { type: 'arabic', text: 'اِنَّ الْمُتَّقِيْنَ فِیْ مَقَامٍ اَمِيْنٍۙ' },
+      { type: 'text', text: '51] Indeed the pious are in a place of peace.' },
+      { type: 'arabic', text: 'فِیْ جَنّٰتٍ وَّ عُيُوْنٍۚ' },
+      { type: 'text', text: '52] In Gardens and water-springs.' },
+      { type: 'arabic', text: 'يَّلْبَسُوْنَ مِنْ سُنْدُسٍ وَّ اِسْتَبْرَقٍ مُّتَقٰبِلِيْنَۚ' },
+      { type: 'text', text: '53] They will be dressed in fine silk and embroidery, facing one another (on thrones).' },
+      { type: 'arabic', text: 'كَذٰلِكَ ؕ وَ زَوَّجْنٰهُمْ بِحُوْرٍ عِيْنٍؕ' },
+      { type: 'text', text: '54] So it is; and We have wedded them to maidens with gorgeous eyes.' },
+      { type: 'arabic', text: 'يَدْعُوْنَ فِيْهَا بِكُلِّ فَاكِهَةٍ اٰمِنِيْنَۙ' },
+      { type: 'text', text: '55] In it they will ask for all kinds of fruit, with safety.' },
+      { type: 'arabic', text: 'لَا يَذُوْقُوْنَ فِيْهَا الْمَوْتَ اِلَّا الْمَوْتَةَ الْاُوْلٰىۚ وَ وَقٰىهُمْ عَذَابَ الْجَحِيْمِۙ' },
+      { type: 'text', text: '56] They will not taste death again in it, except their former death; and Allah has saved them from the punishment of fire.' },
+      { type: 'arabic', text: 'فَضْلًا مِّنْ رَّبِّكَؕ ذٰلِكَ هُوَ الْفَوْزُ الْعَظِيْمُ' },
+      { type: 'text', text: '57] By the munificence of your Lord; this is the great success.' },
+      { type: 'arabic', text: 'فَاِنَّمَا يَسَّرْنٰهُ بِلِسَانِكَ لَعَلَّهُمْ يَتَذَكَّرُوْنَ' },
+      { type: 'text', text: '58] And We have made this Qur’an easy in your language, for them to understand.' },
+      { type: 'arabic', text: 'فَارْتَقِبْ اِنَّهُمْ مُّرْتَقِبُوْنَ' },
+      { type: 'text', text: '59] Therefore wait (O dear Prophet Mohammed - peace and blessings be upon him) - they too are waiting.' }
+            ]
+        },
+
+        {
+            id: 45, name: "AL JASIYA", ar: "الجاثية", juz: 25,
+            audio: 'https://server10.mp3quran.net/minsh/045.mp3',
+            content: [
+                { type: 'section-title', text: 'AL JASIYA (THE CROUCHED ONES)' },
+                { type: 'text', text: '(Revealed at Mecca - 37 verses)' },
+                { type: 'arabic', text: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ' },
+      { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'حـمۤ' },
+      { type: 'text', text: '1] Ha; Meem. (Alphabets of the Arabic language - Allah, and to whomever He reveals, know their precise meanings.)' },
+      { type: 'arabic', text: 'تَنْزِيْلُ الْكِتٰبِ مِنَ اللّٰهِ الْعَزِيْزِ الْحَكِيْمِ' },
+      { type: 'text', text: '2] The sending down of the Book is from Allah, the Most Honourable, the Wise.' },
+      { type: 'arabic', text: 'اِنَّ فِی السَّمٰوٰتِ وَ الْاَرْضِ لَاٰيٰتٍ لِّلْمُؤْمِنِيْنَؕ' },
+      { type: 'text', text: '3] Indeed in the heavens and the earth are signs for believers.' },
+      { type: 'arabic', text: 'وَ فِیْ خَلْقِكُمْ وَ مَا يَبُثُّ مِنْ دَاۤبَّةٍ اٰيٰتٌ لِّقَوْمٍ يُّوْقِنُوْنَۙ' },
+      { type: 'text', text: '4] And in your creation, and all the creatures He scatters in the earth - in them are signs for the people who are certain.' },
+      { type: 'arabic', text: 'وَ اخْتِلَافِ الَّيْلِ وَ النَّهَارِ وَ مَاۤ اَنْزَلَ اللّٰهُ مِنَ السَّمَآءِ مِنْ رِّزْقٍ فَاَحْيَا بِهِ الْاَرْضَ بَعْدَ مَوْتِهَا وَ تَصْرِيْفِ الرِّيٰحِ اٰيٰتٌ لِّقَوْمٍ يَّعْقِلُوْنَ' },
+      { type: 'text', text: '5] And in the alternation of night and day, and in the means of sustenance - water - which Allah sends down from the sky whereby He gave life to the earth after its death, and in the movement of the winds - (in all these) are signs for people of intellect.' },
+      { type: 'arabic', text: 'تِلْكَ اٰيٰتُ اللّٰهِ نَتْلُوْهَا عَلَيْكَ بِالْحَقِّۚ فَبِاَیِّ حَدِيْثٍۭ بَعْدَ اللّٰهِ وَ اٰيٰتِهٖ يُؤْمِنُوْنَ' },
+      { type: 'text', text: '6] These are the verses of Allah which We recite to you with the truth; so forsaking Allah and His signs, what will they believe in?' },
+      { type: 'arabic', text: 'وَيْلٌ لِّكُلِّ اَفَّاكٍ اَثِيْمٍۙ' },
+      { type: 'text', text: '7] Ruin is for every great slanderer, excessive sinner.' },
+      { type: 'arabic', text: 'يَّسْمَعُ اٰيٰتُ اللّٰهِ تُتْلٰى عَلَيْهِ ثُمَّ يُصِرُّ مُسْتَكْبِرًا كَاَنْ لَّمْ يَسْمَعْهَاۚ فَبَشِّرْهُ بِعَذَابٍ اَلِيْمٍ' },
+      { type: 'text', text: '8] Who hears the verses of Allah which are recited to him, then remains stubborn, proud, as if he did not hear them; therefore give him the glad tidings of a painful punishment.' },
+      { type: 'arabic', text: 'وَ اِذَا عَلِمَ مِنْ اٰيٰتِنَا شَيْئًا اتَّخَذَهَا هُزُوًاؕ اُولٰٓئِكَ لَهُمْ عَذَابٌ مُّهِيْنٌؕ' },
+      { type: 'text', text: '9] And when he comes to know about any of the verses, he mocks at it; for them is a disgraceful punishment.' },
+      { type: 'arabic', text: 'مِنْ وَّرَآئِهِمْ جَهَنَّمُۚ وَ لَا يُغْنِیْ عَنْهُمْ مَّا كَسَبُوْا شَيْئًا وَّ لَا مَا اتَّخَذُوْا مِنْ دُوْنِ اللّٰهِ اَوْلِيَآءَۚ وَ لَهُمْ عَذَابٌ عَظِيْمٌ' },
+      { type: 'text', text: '10] Hell is after them; and what they have earned will not benefit them at all, nor those whom they have chosen as supporters besides Allah; and for them is a terrible punishment.' },
+      { type: 'arabic', text: 'هٰذَا هُدًىۚ وَ الَّذِيْنَ كَفَرُوْا بِاٰيٰتِ رَبِّهِمْ لَهُمْ عَذَابٌ مِّنْ رِّجْزٍ اَلِيْمٌ' },
+      { type: 'text', text: '11] This is the (true) guidance; and for those who disbelieve in the verses of their Lord is the severest of painful punishments.' },
+      { type: 'arabic', text: 'اَللّٰهُ الَّذِیْ سَخَّرَ لَكُمُ الْبَحْرَ لِتَجْرِیَ الْفُلْكُ فِيْهِ بِاَمْرِهٖ وَ لِتَبْتَغُوْا مِنْ فَضْلِهٖ وَ لَعَلَّكُمْ تَشْكُرُوْنَۚ' },
+      { type: 'text', text: '12] It is Allah Who has subjected the sea for you so that ships may sail upon it by His command, and for you to seek His munificence, and so that you may give thanks.' },
+      { type: 'arabic', text: 'وَ سَخَّرَ لَكُمْ مَّا فِی السَّمٰوٰتِ وَ مَا فِی الْاَرْضِ جَمِيْعًا مِّنْهُؕ اِنَّ فِیْ ذٰلِكَ لَاٰيٰتٍ لِّقَوْمٍ يَّتَفَكَّرُوْنَ' },
+      { type: 'text', text: '13] And has subjected for you all whatever is in the heavens and in the earth, by His command; indeed in this are signs for people who ponder.' },
+      { type: 'arabic', text: 'قُلْ لِّلَّذِيْنَ اٰمَنُوْا يَغْفِرُوْا لِلَّذِيْنَ لَا يَرْجُوْنَ اَيَّامَ اللّٰهِ لِيَجْزِیَ قَوْمًۢا بِمَا كَانُوْا يَكْسِبُوْنَ' },
+      { type: 'text', text: '14] Tell the believers to ignore those who do not expect the days of Allah, in order that Allah may give a nation the reward of what they used to earn.' },
+      { type: 'arabic', text: 'مَنْ عَمِلَ صَالِحًا فَلِنَفْسِهٖۚ وَ مَنْ اَسَآءَ فَعَلَيْهَاؕ ثُمَّ اِلٰى رَبِّكُمْ تُرْجَعُوْنَ' },
+      { type: 'text', text: '15] Whoever does a good deed, so it is for his own good; and whoever commits evil, does for his own harm; and you will then be returned towards your Lord.' },
+      { type: 'arabic', text: 'وَ لَقَدْ اٰتَيْنَا بَنِیْۤ اِسْرَآءِيْلَ الْكِتٰبَ وَ الْحُكْمَ وَ النُّبُوَّةَ وَ رَزَقْنٰهُمْ مِّنَ الطَّيِّبٰتِ وَ فَضَّلْنٰهُمْ عَلَى الْعٰلَمِيْنَۚ' },
+      { type: 'text', text: '16] And indeed We gave the Descendants of Israel the Book, and the rule, and the Prophethood, and gave good things for sustenance and gave them superiority over all others of their time.' },
+      { type: 'arabic', text: 'وَ اٰتَيْنٰهُمْ بَيِّنٰتٍ مِّنَ الْاَمْرِۚ فَمَا اخْتَلَفُوْۤا اِلَّا مِنْۢ بَعْدِ مَا جَآءَهُمُ الْعِلْمُ بَغْيًاۢ بَيْنَهُمْؕ اِنَّ رَبَّكَ يَقْضِیْ بَيْنَهُمْ يَوْمَ الْقِيٰمَةِ فِيْمَا كَانُوْا فِيْهِ يَخْتَلِفُوْنَ' },
+      { type: 'text', text: '17] And We gave them clear proofs in the command; so they did not differ except after the knowledge had come to them - due to jealousy among themselves; indeed your Lord will judge between them on the Day of Resurrection concerning the matter in which they differ.' },
+      { type: 'arabic', text: 'ثُمَّ جَعَلْنٰكَ عَلٰى شَرِيْعَةٍ مِّنَ الْاَمْرِ فَاتَّبِعْهَا وَ لَا تَتَّبِعْ اَهْوَآءَ الَّذِيْنَ لَا يَعْلَمُوْنَ' },
+      { type: 'text', text: '18] We then placed you (O dear prophet Mohammed - peace and blessings be upon him) upon the clear path of the command, therefore continue following it and do not listen to the desires of the ignorant.' },
+      { type: 'arabic', text: 'اِنَّهُمْ لَنْ يُّغْنُوْا عَنْكَ مِنَ اللّٰهِ شَيْئًاؕ وَ اِنَّ الظّٰلِمِيْنَ بَعْضُهُمْ اَوْلِيَآءُ بَعْضٍۚ وَ اللّٰهُ وَلِیُّ الْمُتَّقِيْنَ' },
+      { type: 'text', text: '19] Indeed they cannot benefit you at all against Allah; and indeed the unjust are the friends of each other; and Allah is the Friend of the pious.' },
+      { type: 'arabic', text: 'هٰذَا بَصَآئِرُ لِلنَّاسِ وَ هُدًى وَّ رَحْمَةٌ لِّقَوْمٍ يُّوْقِنُوْنَ' },
+      { type: 'text', text: '20] This is an enlightenment for mankind, and a guidance and mercy for the people of faith.' },
+      { type: 'arabic', text: 'اَمْ حَسِبَ الَّذِيْنَ اجْتَرَحُوا السَّيِّاٰتِ اَنْ نَّجْعَلَهُمْ كَالَّذِيْنَ اٰمَنُوْا وَ عَمِلُوا الصّٰلِحٰتِ سَوَآءً مَّحْيٰهُمْ وَ مَمَاتُهُمْؕ سَآءَ مَا يَحْكُمُوْنَ' },
+      { type: 'text', text: '21] Do those who commit evil assume that We will make them equal to those who believe and do good deeds, therefore both becoming equal in life and death? What an evil judgement they impose!' },
+      { type: 'arabic', text: 'وَ خَلَقَ اللّٰهُ السَّمٰوٰتِ وَ الْاَرْضَ بِالْحَقِّ وَ لِتُجْزٰى كُلُّ نَفْسٍۢ بِمَا كَسَبَتْ وَ هُمْ لَا يُظْلَمُوْنَ' },
+      { type: 'text', text: '22] And Allah has created the heavens and the earth with the truth, and so that every soul is repaid for what it has earned, and they will not be wronged.' },
+      { type: 'arabic', text: 'اَفَرَاَيْتَ مَنِ اتَّخَذَ اِلٰهَهٗ هَوٰىهُ وَ اَضَلَّهُ اللّٰهُ عَلٰى عِلْمٍ وَّ خَتَمَ عَلٰى سَمْعِهٖ وَ قَلْبِهٖ وَ جَعَلَ عَلٰى بَصَرِهٖ غِشٰوَةًؕ فَمَنْ يَّهْدِيْهِ مِنْۢ بَعْدِ اللّٰهِؕ اَفَلَا تَذَكَّرُوْنَ' },
+      { type: 'text', text: '23] Just look at him who makes his desire as his God, and Allah has sent him astray despite his having knowledge, and set a seal upon his ears and his heart, and a covering upon his eyes; so who will guide him after Allah? So do you not ponder?' },
+      { type: 'arabic', text: 'وَ قَالُوْا مَا هِیَ اِلَّا حَيَاتُنَا الدُّنْيَا نَمُوْتُ وَ نَحْيَا وَ مَا يُهْلِكُنَاۤ اِلَّا الدَّهْرُۚ وَ مَا لَهُمْ بِذٰلِكَ مِنْ عِلْمٍ اِنْ هُمْ اِلَّا يَظُنُّوْنَ' },
+      { type: 'text', text: '24] And they said, “There is nothing except our life of this world - we die and we live - and nothing destroys us except the passage of time”; and they do not have any knowledge of it; they only make guesses.' },
+      { type: 'arabic', text: 'وَ اِذَا تُتْلٰى عَلَيْهِمْ اٰيٰتُنَا بَيِّنٰتٍ مَّا كَانَ حُجَّتَهُمْ اِلَّاۤ اَنْ قَالُوا ائْتُوْا بِاٰبَآئِنَاۤ اِنْ كُنْتُمْ صٰدِقِيْنَ' },
+      { type: 'text', text: '25] And when Our clear verses are recited to them, their only argument is, “Bring back our forefathers, if you are truthful!”' },
+      { type: 'arabic', text: 'قُلِ اللّٰهُ يُحْيِيْكُمْ ثُمَّ يُمِيْتُكُمْ ثُمَّ يَجْمَعُكُمْ اِلٰى يَوْمِ الْقِيٰمَةِ لَا رَيْبَ فِيْهِ وَ لٰكِنَّ اَكْثَرَ النَّاسِ لَا يَعْلَمُوْنَ' },
+      { type: 'text', text: '26] Proclaim (O dear Prophet Mohammed - peace and blessings be upon him), “It is Allah Who gives you life, then will give you death, then will gather you all on the Day of Resurrection in which there is no doubt, but most people do not know.”' },
+      { type: 'arabic', text: 'وَ لِلّٰهِ مُلْكُ السَّمٰوٰتِ وَ الْاَرْضِؕ وَ يَوْمَ تَقُوْمُ السَّاعَةُ يَوْمَئِذٍ يَّخْسَرُ الْمُبْطِلُوْنَ' },
+      { type: 'text', text: '27] And to Allah only belongs the kingship of the heavens and the earth; and when the Last Day is established - on that day the followers of falsehood will suffer loss.' },
+      { type: 'arabic', text: 'وَ تَرٰى كُلَّ اُمَّةٍ جَاثِيَةً۫ كُلُّ اُمَّةٍ تُدْعٰى اِلٰى كِتٰبِهَاؕ اَلْيَوْمَ تُجْزَوْنَ مَا كُنْتُمْ تَعْمَلُوْنَ' },
+      { type: 'text', text: '28] And you will see every group down on its knees; every group will be called towards its book of deeds; “This day you will be repaid for what you did.”' },
+      { type: 'arabic', text: 'هٰذَا كِتٰبُنَا يَنْطِقُ عَلَيْكُمْ بِالْحَقِّؕ اِنَّا كُنَّا نَسْتَنْسِخُ مَا كُنْتُمْ تَعْمَلُوْنَ' },
+      { type: 'text', text: '29] “This Book of Ours speaks against you with the truth; indeed We had been recording all what you did.”' },
+      { type: 'arabic', text: 'فَاَمَّا الَّذِيْنَ اٰمَنُوْا وَ عَمِلُوا الصّٰلِحٰتِ فَيُدْخِلُهُمْ رَبُّهُمْ فِیْ رَحْمَتِهٖؕ ذٰلِكَ هُوَ الْفَوْزُ الْمُبِيْنُ' },
+      { type: 'text', text: '30] So those who believed and did good deeds - their Lord will admit them into His mercy; this is the clear triumph.' },
+      { type: 'arabic', text: 'وَ اَمَّا الَّذِيْنَ كَفَرُوْا ؕ اَفَلَمْ تَكُنْ اٰيٰتِیْ تُتْلٰى عَلَيْكُمْ فَاسْتَكْبَرْتُمْ وَ كُنْتُمْ قَوْمًا مُّجْرِمُوْنَ' },
+      { type: 'text', text: '31] And to those who disbelieved, it will be said “Was it not that Our verses were recited to you? In response you were haughty and were a guilty people.”' },
+      { type: 'arabic', text: 'وَ اِذَا قِيْلَ اِنَّ وَعْدَ اللّٰهِ حَقٌّ وَّ السَّاعَةُ لَا رَيْبَ فِيْهَا قُلْتُمْ مَّا نَدْرِی مَا السَّاعَةُ اِنْ نَّظُنُّ اِلَّا ظَنًّا وَّ مَا نَحْنُ بِمُسْتَيْقِنِيْنَ' },
+      { type: 'text', text: '32] “And when it was said, ‘Indeed Allah’s promise is true and there is no doubt regarding the Last Day”, you used to say, ‘We do not know what the Last Day is - we think it is nothing except an imagination, and we are not convinced.’ ”' },
+      { type: 'arabic', text: 'وَ بَدَا لَهُمْ سَيِّاٰتُ مَا عَمِلُوْا وَ حَاقَ بِهِمْ مَّا كَانُوْا بِهٖ يَسْتَهْزِءُوْنَ' },
+      { type: 'text', text: '33] And the evils of their deeds appeared to them, and the punishment they used to mock at encompassed them.' },
+      { type: 'arabic', text: 'وَ قِيْلَ الْيَوْمَ نَنْسٰىكُمْ كَمَا نَسِيْتُمْ لِقَآءَ يَوْمِكُمْ هٰذَا وَ مَاْوٰىكُمُ النَّارُ وَ مَا لَكُمْ مِّنْ نّٰصِرِيْنَ' },
+      { type: 'text', text: '34] And it will be said, “This day We shall forsake you, the way you had forgotten the confronting of this day of yours - and your destination is the fire, and you do not have any supporters.”' },
+      { type: 'arabic', text: 'ذٰلِكُمْ بِاَنَّكُمُ اتَّخَذْتُمْ اٰيٰتِ اللّٰهِ هُزُوًا وَّ غَرَّتْكُمُ الْحَيٰوةُ الدُّنْيَاۚ فَالْيَوْمَ لَا يُخْرَجُوْنَ مِنْهَا وَ لَا هُمْ يُسْتَعْتَبُوْنَ' },
+      { type: 'text', text: '35] “This is because you mocked at the signs of Allah, and the worldly life deceived you”; so this day they are not to be removed from the fire, nor will anyone seek amends from them.' },
+      { type: 'arabic', text: 'فَلِلّٰهِ الْحَمْدُ رَبِّ السَّمٰوٰتِ وَ رَبِّ الْاَرْضِ رَبِّ الْعٰلَمِيْنَ' },
+      { type: 'text', text: '36] So all praise is for Allah only, the Lord of the heavens and the Lord of the earth, the Lord of the Creation!' },
+      { type: 'arabic', text: 'وَ لَهُ الْكِبْرِيَآءُ فِی السَّمٰوٰتِ وَ الْاَرْضِؕ وَ هُوَ الْعَزِيْزُ الْحَكِيْمُ' },
+   { type: 'text', text: '37] And for Him only is the Greatness, in the heavens and in the earth; and He only is the Most Honourable, the Wise.' }
+            ]
+        },
+
+        {
+            id: 46, name: "AL AHQAF", ar: "الأحقاف", juz: 26,
+            audio: 'https://server10.mp3quran.net/minsh/046.mp3',
+            content: [
+                { type: 'section-title', text: 'AL AHQAF (THE SAND DUNES)' },
+                { type: 'text', text: '(Revealed at Mecca - 35 verses)' },
+                { type: 'arabic', text: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ' },
+                 { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'حـمۤ' },
+      { type: 'text', text: '1] Ha-Meem. (Alphabets of the Arabic language - Allah, and to whomever He reveals, know their precise meanings.)' },
+      { type: 'arabic', text: 'تَنْزِيْلُ الْكِتٰبِ مِنَ اللّٰهِ الْعَزِيْزِ الْحَكِيْمِؕ' },
+      { type: 'text', text: '2] The sending down of this Book is from Allah the Most Honourable, the Wise.' },
+      { type: 'arabic', text: 'مَا خَلَقْنَا السَّمٰوٰتِ وَ الْاَرْضَ وَ مَا بَيْنَهُمَاۤ اِلَّا بِالْحَقِّ وَ اَجَلٍ مُّسَمًّى ؕ وَ الَّذِيْنَ كَفَرُوْا عَمَّاۤ اُنْذِرُوْا مُعْرِضُوْنَ' },
+      { type: 'text', text: '3] We did not create the heavens and the earth and all that is between them except with the truth, and for a fixed term; and the disbelievers have turned away from what they are warned!' },
+      { type: 'arabic', text: 'قُلْ اَرَاَيْتُمْ مَّا تَدْعُوْنَ مِنْ دُوْنِ اللّٰهِ اَرُوْنِيْ مَاذَا خَلَقُوْا مِنَ الْاَرْضِ اَمْ لَهُمْ شِرْكٌ فِي السَّمٰوٰتِ ۚ ائْتُوْنِيْ بِكِتٰبٍ مِّنْ قَبْلِ هٰذَاۤ اَوْ اَثٰرَةٍ مِّنْ عِلْمٍ اِنْ كُنْتُمْ صٰدِقِيْنَ' },
+      { type: 'text', text: '4] Proclaim, (O dear Prophet Mohammed - peace and blessings be upon him), “What is your opinion - regarding those whom you worship other than Allah - show me which part of the earth they have created, or do they own any portion of the heavens? Bring to me a Book preceding this (Qur’an), or some remnants of knowledge, if you are truthful.”' },
+      { type: 'arabic', text: 'وَ مَنْ اَضَلُّ مِمَّنْ يَّدْعُوْا مِنْ دُوْنِ اللّٰهِ مَنْ لَّا يَسْتَجِيْبُ لَهٗۤ اِلٰی يَوْمِ الْقِيٰمَةِ وَ هُمْ عَنْ دُعَآئِهِمْ غٰفِلُوْنَ' },
+      { type: 'text', text: '5] And who is more astray than one who worships those, instead of Allah, who cannot listen to their prayer until* the Day of Resurrection, and who do not even know of their worship! (Will never listen.)' },
+      { type: 'arabic', text: 'وَ اِذَا حُشِرَ النَّاسُ كَانُوْا لَهُمْ اَعْدَآءً وَّ كَانُوْا بِعِبَادَتِهِمْ كٰفِرِيْنَ' },
+      { type: 'text', text: '6] And on the day when people are gathered, they will become their enemies, and will reject their worshippers. (The idols will give testimony against the polytheists.)' },
+      { type: 'arabic', text: 'وَ اِذَا تُتْلٰی عَلَيْهِمْ اٰيٰتُنَا بَيِّنٰتٍ قَالَ الَّذِيْنَ كَفَرُوْا لِلْحَقِّ لَمَّا جَآءَهُمْ ۙ هٰذَا سِحْرٌ مُّبِيْنٌؕ' },
+      { type: 'text', text: '7] And when Our clear verses are recited to them, the disbelievers say regarding the Truth that has come to them, “This is an obvious magic!”' },
+      { type: 'arabic', text: 'اَمْ يَقُوْلُوْنَ افْتَرٰىهُ ؕ قُلْ اِنِ افْتَرَيْتُهٗ فَلَا تَمْلِكُوْنَ لِيْ مِنَ اللّٰهِ شَيْئًا ؕ هُوَ اَعْلَمُ بِمَا تُفِيْضُوْنَ فِيْهِ ؕ كَفٰی بِهٖ شَهِيْدًۢا بَيْنِيْ وَ بَيْنَكُمْ ؕ وَ هُوَ الْغَفُوْرُ الرَّحِيْمُ' },
+      { type: 'text', text: '8] What! They dare say, “He has fabricated it”? Say (O dear Prophet Mohammed - peace and blessings be upon him), “If I have fabricated it, then (I know that) you have no power to support me against Allah; He well knows the matters you are involved in; He is Sufficient as a Witness between me and you; and He only is the Oft Forgiving, the Most Merciful.”' },
+      { type: 'arabic', text: 'قُلْ مَا كُنْتُ بِدْعًا مِّنَ الرُّسُلِ وَ مَاۤ اَدْرِيْ مَا يُفْعَلُ بِيْ وَ لَا بِكُمْ ؕ اِنْ اَتَّبِعُ اِلَّا مَا يُوحٰۤى اِلَيَّ وَ مَاۤ اَنَا اِلَّا نَذِيْرٌ مُّبِيْنٌ' },
+      { type: 'text', text: '9] Say, “I am not something new* among the Noble Messengers, nor do I know (on my own) what will happen to me** or with you; I only follow that which is divinely revealed to me, and I am purely a Herald of clear warning. (* I am like the earlier ones. ** My knowledge comes due to divine revelations.)' },
+      { type: 'arabic', text: 'قُلْ اَرَاَيْتُمْ اِنْ كَانَ مِنْ عِنْدِ اللّٰهِ وَ كَفَرْتُمْ بِهٖ وَ شَهِدَ شَاهِدٌ مِّنْۢ بَنِيْۤ اِسْرَآءِيْلَ عَلٰی مِثْلِهٖ فَاٰمَنَ وَ اسْتَكْبَرْتُمْ ؕ اِنَّ اللّٰهَ لَا يَهْدِي الْقَوْمَ الظّٰلِمِيْنَ' },
+      { type: 'text', text: '10] Say, “What is your opinion - if the Qur’an is from Allah and you have rejected faith in it, and a witness among the Descendants of Israel has already testified upon this and accepted faith, while you became arrogant? Indeed Allah does not guide the unjust.”' },
+      { type: 'arabic', text: 'وَ قَالَ الَّذِيْنَ كَفَرُوْا لِلَّذِيْنَ اٰمَنُوْا لَوْ كَانَ خَيْرًا مَّا سَبَقُوْنَاۤ اِلَيْهِ ؕ وَ اِذْ لَمْ يَهْتَدُوْا بِهٖ فَسَيَقُوْلُوْنَ هٰذَاۤ اِفْكٌ قَدِيْمٌ' },
+      { type: 'text', text: '11] And the disbelievers said regarding the Muslims, “If there were any good in it, the Muslims would not have surpassed us in achieving it!”; and since they did not receive guidance with it, they will now say, “This is an old slander.”' },
+      { type: 'arabic', text: 'وَ مِنْ قَبْلِهٖ كِتٰبُ مُوْسٰۤى اِمَامًا وَّ رَحْمَةً ؕ وَ هٰذَا كِتٰبٌ مُّصَدِّقٌ لِّسَانًا عَرَبِيًّا لِّيُنْذِرَ الَّذِيْنَ ظَلَمُوْا ۖ وَ بُشْرٰی لِلْمُحْسِنِيْنَؕ' },
+      { type: 'text', text: '12] And whereas before this exists the Book of Moosa, a guide and a mercy; and this is a Book giving testimony, in the Arabic language, to warn the unjust; and to give glad tidings to the virtuous.' },
+      { type: 'arabic', text: 'اِنَّ الَّذِيْنَ قَالُوْا رَبُّنَا اللّٰهُ ثُمَّ اسْتَقَامُوْا فَلَا خَوْفٌ عَلَيْهِمْ وَ لَا هُمْ يَحْزَنُوْنَۚ' },
+      { type: 'text', text: '13] Indeed those who said, “Allah is our Lord”, and then remained steadfast - upon them is neither any fear nor shall they grieve.' },
+      { type: 'arabic', text: 'اُولٰٓئِكَ اَصْحٰبُ الْجَنَّةِ خٰلِدِيْنَ فِيْهَا ۚ جَزَآءًۢ بِمَا كَانُوْا يَعْمَلُوْنَ' },
+      { type: 'text', text: '14] They are the People of Paradise, abiding in it forever; the reward of their deeds.' },
+      { type: 'arabic', text: 'وَ وَصَّيْنَا الْاِنْسَانَ بِوَالِدَيْهِ اِحْسَانًا ؕ حَمَلَتْهُ اُمُّهٗ كُرْهًا وَّ وَضَعَتْهُ كُرْهًا ؕ وَ حَمْلُهٗ وَ فِصٰلُهٗ ثَلٰثُوْنَ شَهْرًا ؕ حَتّٰۤى اِذَا بَلَغَ اَشُدَّهٗ وَ بَلَغَ اَرْبَعِيْنَ سَنَةً ۙ قَالَ رَبِّ اَوْزِعْنِيْۤ اَنْ اَشْكُرَ نِعْمَتَكَ الَّتِيْۤ اَنْعَمْتَ عَلَيَّ وَ عَلٰی وَالِدَيَّ وَ اَنْ اَعْمَلَ صَالِحًا تَرْضٰىهُ وَ اَصْلِحْ لِيْ فِيْ ذُرِّيَّتِيْ ۪ اِنِّيْ تُبْتُ اِلَيْكَ وَ اِنِّيْ مِنَ الْمُسْلِمِيْنَ' },
+      { type: 'text', text: '15] And We have commanded man to be good towards parents; his mother bore him with hardship, and delivered him with hardship; and carrying him and weaning him is for thirty months; until when he * reached maturity and became forty years of age, he said, “My Lord! Inspire me to be thankful for the favours you bestowed upon me and my parents, and that I may perform the deeds pleasing to You, and keep merit among my offspring; I have inclined towards you and I am a Muslim.” (* This verse was revealed concerning S. Abu Bakr - the first caliph, R. A. A)' },
+      { type: 'arabic', text: 'اُولٰٓئِكَ الَّذِيْنَ نَتَقَبَّلُ عَنْهُمْ اَحْسَنَ مَا عَمِلُوْا وَ نَتَجَاوَزُ عَنْ سَيِّاٰتِهِمْ فِيْۤ اَصْحٰبُ الْجَنَّةِ ؕ وَعْدَ الصِّدْقِ الَّذِيْ كَانُوْا يُوْعَدُوْنَ' },
+      { type: 'text', text: '16] These are the ones whose good deeds We will accept, and overlook their shortfalls - among the People of Paradise; a true promise which is being given to them.' },
+      { type: 'arabic', text: 'وَ الَّذِيْ قَالَ لِوَالِدَيْهِ اُفٍّ لَّكُمَاۤ اَتَعِدٰنِنِيْۤ اَنْ اُخْرَجَ وَ قَدْ خَلَتِ الْقُرُوْنُ مِنْ قَبْلِيْ ۚ وَ هُمَا يَسْتَغِيْثَانِ اللّٰهَ وَيْلَكَ اٰمِنْ ۖ اِنَّ وَعْدَ اللّٰهِ حَقٌّ ۚ فَيَقُوْلُ مَا هٰذَاۤ اِلَّاۤ اَسَاطِيْرُ الْاَوَّلِيْنَ' },
+      { type: 'text', text: '17] And the one who said to his parents, “Uff - I am fed up with both of you! What! You promise me that I will be raised again whereas generations have passed away before me?” And they both seek Allah’s help and say to him, “May you be ruined, accept faith! Indeed Allah’s promise is true”; he therefore answers, “This is nothing except stories of former people.”' },
+      { type: 'arabic', text: 'اُولٰٓئِكَ الَّذِيْنَ حَقَّ عَلَيْهِمُ الْقَوْلُ فِيْۤ اُمَمٍ قَدْ خَلَتْ مِنْ قَبْلِهِمْ مِّنَ الْجِنِّ وَ الْاِنْسِ ؕ اِنَّهُمْ كَانُوْا خٰسِرِيْنَ' },
+      { type: 'text', text: '18] It is these upon whom the Word has proved true, among the nations that passed away before them, of jinns and men; indeed they were losers.' },
+      { type: 'arabic', text: 'وَ لِكُلٍّ دَرَجٰتٌ مِّمَّا عَمِلُوْا ۚ وَ لِيُوَفِّيَهُمْ اَعْمَالَهُمْ وَ هُمْ لَا يُظْلَمُوْنَ' },
+      { type: 'text', text: '19] And for all persons are ranks according to their deeds; and so that He may repay them in full for their deeds, and they will not be wronged.' },
+      { type: 'arabic', text: 'وَ يَوْمَ يُعْرَضُ الَّذِيْنَ كَفَرُوْا عَلَى النَّارِ ؕ اَذْهَبْتُمْ طَيِّبٰتِكُمْ فِيْ حَيَاتِكُمُ الدُّنْيَا وَ اسْتَمْتَعْتُمْ بِهَا ۚ فَالْيَوْمَ تُجْزَوْنَ عَذَابَ الْهُوْنِ بِمَا كُنْتُمْ تَسْتَكْبِرُوْنَ فِي الْاَرْضِ بِغَيْرِ الْحَقِّ وَ بِمَا كُنْتُمْ تَفْسُقُوْنَ' },
+      { type: 'text', text: '20] And on the day when the disbelievers will be presented upon the fire; it will be said to them, “You have wasted your portion of the good things in the life of this world and enjoyed them; so this day you will be repaid with the disgraceful punishment, the recompense of your wrongfully priding yourself in the land, and because you used to disobey.”' },
+      { type: 'arabic', text: 'وَ اذْكُرْ اَخَا عَادٍ ؕ اِذْ اَنْذَرَ قَوْمَهٗ بِالْاَحْقَافِ وَ قَدْ خَلَتِ النُّذُرُ مِنْۢ بَيْنِ يَدَيْهِ وَ مِنْ خَلْفِهٖۤ اَلَّا تَعْبُدُوْا اِلَّا اللّٰهَ ؕ اِنِّيْۤ اَخَافُ عَلَيْكُمْ عَذَابَ يَوْمٍ عَظِيْمٍ' },
+      { type: 'text', text: '21] And remember the fellowman of the tribe of A’ad; when he warned his nation in the Ahqaf * - and indeed Heralds of warning passed away before and after him - that, “Do not worship anyone except Allah; indeed I fear the punishment of a Great Day upon you. (* A country among sand dunes.)' },
+      { type: 'arabic', text: 'قَالُوْۤا اَجِئْتَنَا لِتَاْفِكَنَا عَنْ اٰلِهَتِنَا ۚ فَاْتِنَا بِمَا تَعِدُنَاۤ اِنْ كُنْتُمْ صٰدِقِيْنَ' },
+      { type: 'text', text: '22] They said, “Have you come to us in order to turn us away from our Gods? Therefore bring upon us what you promise us, if you are truthful.”' },
+      { type: 'arabic', text: 'قَالَ اِنَّمَا الْعِلْمُ عِنْدَ اللّٰهِ ۖ وَ اُبَلِّغُكُمْ مَّاۤ اُرْسِلْتُ بِهٖ وَ لٰكِنِّيْۤ اَرٰىكُمْ قَوْمًا تَجْهَلُوْنَ' },
+      { type: 'text', text: '23] He said, “Its knowledge is only with Allah; and I convey to you the messages of my Lord, but I perceive that you are an ignorant nation.”' },
+      { type: 'arabic', text: 'فَلَمَّا رَاَوْهُ عَارِضًا مُّسْتَقْبِلَ اَوْدِيَتِهِمْ ۙ قَالُوْا هٰذَا عَارِضٌ مُّقْطِرُنَا ؕ بَلْ هُوَ مَا اسْتَعْجَلْتُمْ بِهٖ ؕ رِيْحٌ فِيْهَا عَذَابٌ اَلِيْمٌ' },
+      { type: 'text', text: '24] So when they saw the punishment coming towards their valleys, spread like a cloud on the horizon, they said, “That is a cloud which will shower rain upon us”; said Hud “In fact this is what you were being impatient for; a windstorm carrying a painful punishment.”' },
+      { type: 'arabic', text: 'تُدَمِّرُ كُلَّ شَيْءٍۢ بِاَمْرِ رَبِّهَا فَاَصْبَحُوْا لَا يُرٰۤى اِلَّا مَسٰكِنُهُمْ ؕ كَذٰلِكَ نَجْزِي الْقَوْمَ الْمُجْرِمِيْنَ' },
+      { type: 'text', text: '25] “That destroys all things by the command of its Lord” - so at morning none could be seen except their empty houses; this is the sort of punishment We mete out to the guilty.' },
+      { type: 'arabic', text: 'وَ لَقَدْ مَكَّنّٰهُمْ فِيْمَاۤ اِنْ مَّكَّنّٰكُمْ فِيْهِ وَ جَعَلْنَا لَهُمْ سَمْعًا وَّ اَبْصَارًا وَّ اَفْـِٕدَةً ۖ فَمَاۤ اَغْنٰی عَنْهُمْ سَمْعُهُمْ وَ لَاۤ اَبْصَارُهُمْ وَ لَاۤ اَفْـِٕدَتُهُمْ مِّنْ شَيْءٍ اِذْ كَانُوْا يَجْحَدُوْنَ بِاٰيٰتِ اللّٰهِ وَ حَاقَ بِهِمْ مَّا كَانُوْا بِهٖ يَسْتَهْزِءُوْنَ' },
+      { type: 'text', text: '26] And We had indeed given them the means which We have not given you, and made ears and eyes and hearts for them; so their ears and eyes and hearts did not benefit them at all because they used to deny the signs of Allah, and the punishment they used to mock at encompassed them.' },
+      { type: 'arabic', text: 'وَ لَقَدْ اَهْلَكْنَا مَا حَوْلَكُمْ مِّنَ الْقُرٰی وَ صَرَّفْنَا الْاٰيٰتِ لَعَلَّهُمْ يَرْجِعُوْنَ' },
+      { type: 'text', text: '27] And We indeed destroyed townships surrounding you, and brought several signs so that they may desist.' },
+      { type: 'arabic', text: 'فَلَوْ لَا نَصَرَهُمُ الَّذِيْنَ اتَّخَذُوْا مِنْ دُوْنِ اللّٰهِ قُرْبَانًا اٰلِهَةً ؕ بَلْ ضَلُّوْا عَنْهُمْ ۚ وَ ذٰلِكَ اِفْكُهُمْ وَ مَا كَانُوْا يَفْتَرُوْنَ' },
+      { type: 'text', text: '28] So why did they - the ones whom they had chosen as Gods as a means of attaining Allah’s proximity - not help them? In fact the disbelievers lost them; and this is just their slander and fabrication.' },
+      { type: 'arabic', text: 'وَ اِذْ صَرَفْنَاۤ اِلَيْكَ نَفَرًا مِّنَ الْجِنِّ يَسْتَمِعُوْنَ الْقُرْاٰنَ ۚ فَلَمَّا حَضَرُوْهُ قَالُوْۤا اَنْصِتُوْا ۚ فَلَمَّا قُضِيَ وَلَّوْا اِلٰی قَوْمِهِمْ مُّنْذِرِيْنَ' },
+      { type: 'text', text: '29] And when We sent a number of jinns towards you (O dear Prophet Mohammed - peace and blessings be upon him), listening attentively to the Qur’an; so when they presented themselves there, they said to each other, “Listen quietly!”; and when the recitation finished, they turned back to their people, giving them warning.' },
+      { type: 'arabic', text: 'قَالُوْا يٰقَوْمَنَاۤ اِنَّا سَمِعْنَا كِتٰبًا اُنْزِلَ مِنْۢ بَعْدِ مُوْسٰی مُصَدِّقًا لِّمَا بَيْنَ يَدَيْهِ يَهْدِيْ اِلَى الْحَقِّ وَ اِلٰی طَرِيْقٍ مُّسْتَقِيْمٍ' },
+      { type: 'text', text: '30] They said, “O our people! We have indeed heard a Book, sent down after Moosa, which confirms the Books preceding it, and guides towards the Truth and the Straight Path.”' },
+      { type: 'arabic', text: 'يٰقَوْمَنَاۤ اَجِيْبُوْا دَاعِيَ اللّٰهِ وَ اٰمِنُوْا بِهٖ يَغْفِرْ لَكُمْ مِّنْ ذُنُوْبِكُمْ وَ يُجِرْكُمْ مِّنْ عَذَابٍ اَلِيْمٍ' },
+      { type: 'text', text: '31] “O our people! Listen to Allah’s caller and accept faith in Him, so that He may forgive you some of your sins and save you from the painful punishment.”' },
+      { type: 'arabic', text: 'وَ مَنْ لَّا يُجِبْ دَاعِيَ اللّٰهِ فَلَيْسَ بِمُعْجِزٍ فِي الْاَرْضِ وَ لَيْسَ لَهٗ مِنْ دُوْنِهٖۤ اَوْلِيَآءُ ؕ اُولٰٓئِكَ فِيْ ضَلٰلٍ مُّبِيْنٍ' },
+      { type: 'text', text: '32] “And whoever does not listen to Allah’s caller cannot escape in the earth, and he has no supporters against Allah; they are in open error.”' },
+      { type: 'arabic', text: 'اَوَلَمْ يَرَوْا اَنَّ اللّٰهَ الَّذِيْ خَلَقَ السَّمٰوٰتِ وَ الْاَرْضَ وَ لَمْ يَعْيَ بِخَلْقِهِنَّ بِقٰدِرٍ عَلٰۤى اَنْ يُّحْيِيَ الْمَوْتٰی ؕ بَلٰۤى اِنَّهٗ عَلٰی كُلِّ شَيْءٍ قَدِيْرٌ' },
+      { type: 'text', text: '33] Have they not realised that Allah, Who did not tire in creating the heavens and the earth and in creating them, is Able to revive the dead? Surely yes, why not? Indeed He is Able to do all things.' },
+      { type: 'arabic', text: 'وَ يَوْمَ يُعْرَضُ الَّذِيْنَ كَفَرُوْا عَلَى النَّارِ ؕ اَلَيْسَ هٰذَا بِالْحَقِّ ؕ قَالُوْا بَلٰی وَ رَبِّنَا ؕ قَالَ فَذُوْقُوا الْعَذَابَ بِمَا كُنْتُمْ تَكْفُرُوْنَ' },
+      { type: 'text', text: '34] And on the day when the disbelievers are presented upon the fire; it will be said, “Is this not a reality?” They will answer, “By oath of our Lord, surely yes, why not?”; it will be said, “Therefore taste the punishment, the recompense of your disbelief.”' },
+      { type: 'arabic', text: 'فَاصْبِرْ كَمَا صَبَرَ اُولُوا الْعَزمِ مِنَ الرُّسُلِ وَ لَا تَسْتَعْجِلْ لَّهُمْ ؕ كَاَنَّهُمْ يَوْمَ يَرَوْنَ مَا يُوْعَدُوْنَ ۙ لَمْ يَلْبَثُوْۤا اِلَّا سَاعَةً مِّنْ نَّهَارٍ ؕ بَلٰغٌ ۚ فَهَلْ يُهْلَكُ اِلَّا الْقَوْمُ الْفٰسِقُوْنَ' },
+      { type: 'text', text: '35] Therefore patiently endure (O dear Prophet Mohammed - peace and blessings be upon him) like the courageous Noble Messengers had endured, and do not be impatient for them; on the day when they see what they are promised, it will be as if they had not stayed on earth except part of a day; this is to be conveyed; will anyone be destroyed, except the disobedient?' }
+            ]
+        },
+
+        {
+            id: 47, name: "MOHAMMED", ar: "محمد", juz: 26,
+            audio: 'https://server10.mp3quran.net/minsh/047.mp3',
+            content: [
+                { type: 'section-title', text: 'MOHAMMED' },
+                { type: 'text', text: '(Revealed at Medinah - 38 verses)' },
+                { type: 'arabic', text: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ' },
+ { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'اَلَّذِيْنَ كَفَرُوْا وَ صَدُّوْا عَنْ سَبِيْلِ اللّٰهِ اَضَلَّ اَعْمَالَهُمْ' },
+      { type: 'text', text: '1] Allah has destroyed the deeds of those who disbelieved and prevented from Allah’s way.' },
+      { type: 'arabic', text: 'وَ الَّذِيْنَ اٰمَنُوْا وَ عَمِلُوا الصّٰلِحٰتِ وَ اٰمَنُوْا بِمَا نُزِّلَ عَلٰی مُحَمَّدٍ وَّ هُوَ الْحَقُّ مِنْ رَّبِّهِمْ ۙ كَفَّرَ عَنْهُمْ سَيِّاٰتِهِمْ وَ اَصْلَحَ بَالَهُمْ' },
+      { type: 'text', text: '2] And those who accepted faith and did good deeds and believed in what has been sent down upon Mohammed (peace and blessings be upon him) - and that is the truth from their Lord - Allah has relieved them of some of their evils and refined their condition.' },
+      { type: 'arabic', text: 'ذٰلِكَ بِاَنَّ الَّذِيْنَ كَفَرُوا اتَّبَعُوا الْبَاطِلَ وَ اَنَّ الَّذِيْنَ اٰمَنُوا اتَّبَعُوا الْحَقَّ مِنْ رَّبِّهِمْ ؕ كَذٰلِكَ يَضْرِبُ اللّٰهُ لِلنَّاسِ اَمْثَالَهُمْ' },
+      { type: 'text', text: '3] This is because the disbelievers followed falsehood and the believers followed the Truth which is from their Lord; this is how Allah illustrates the examples of people to them.' },
+      { type: 'arabic', text: 'فَاِذَا لَقِيْتُمُ الَّذِيْنَ كَفَرُوْا فَضَرْبَ الرِّقَابِ ؕ حَتّٰۤى اِذَاۤ اَثْخَنْتُمُوْهُمْ فَشُدُّوا الْوَثَاقَ ۙ فَاِمَّا مَنَّۢا بَعْدُ وَ اِمَّا فِدَآءً حَتّٰی تَضَعَ الْحَرْبُ اَوْزَارَهَا ؕ۬ ذٰلِكَ ؕ وَ لَوْ يَشَآءُ اللّٰهُ لَانْتَصَرَ مِنْهُمْ وَ لٰكِنْ لِّيَبْلُوَ بَعْضَكُمْ بِبَعْضٍ ؕ وَ الَّذِيْنَ قُتِلُوْا فِيْ سَبِيْلِ اللّٰهِ فَلَنْ يُّضِلَّ اَعْمَالَهُمْ' },
+      { type: 'text', text: '4] So when you confront the disbelievers, strike at their necks; until when you have slain them in plenty, tie them up firmly; then after that, you may either release them as a favour or take ransom, until the war lays down its ordeal; this is it; and had Allah willed He Himself could have taken revenge from them, but this is to test some of you with others; and Allah will surely never waste the deeds of those who were killed in His way.' },
+      { type: 'arabic', text: 'سَيَهْدِيْهِمْ وَ يُصْلِحُ بَالَهُمْۚ' },
+      { type: 'text', text: '5] He will soon guide them (towards Paradise) and make them succeed.' },
+      { type: 'arabic', text: 'وَ يُدْخِلُهُمُ الْجَنَّةَ عَرَّفَهَا لَهُمْ' },
+      { type: 'text', text: '6] And He will admit them into Paradise - they have been made familiar with it.' },
+      { type: 'arabic', text: 'يٰۤاَيُّهَا الَّذِيْنَ اٰمَنُوْۤا اِنْ تَنْصُرُوا اللّٰهَ يَنْصُرْكُمْ وَ يُثَبِّتْ اَقْدَامَكُمْ' },
+      { type: 'text', text: '7] O People who Believe! If you help the religion of Allah, He will help you and will stabilise you.' },
+      { type: 'arabic', text: 'وَ الَّذِيْنَ كَفَرُوْا فَتَعْسًا لَّهُمْ وَ اَضَلَّ اَعْمَالَهُمْ' },
+      { type: 'text', text: '8] And for those who disbelieve - may they be ruined, and may Allah destroy all their deeds!' },
+      { type: 'arabic', text: 'ذٰلِكَ بِاَنَّهُمْ كَرِهُوْا مَاۤ اَنْزَلَ اللّٰهُ فَاَحْبَطَ اَعْمَالَهُمْ' },
+      { type: 'text', text: '9] This is because they disliked what Allah has sent down - He has therefore squandered all their deeds.' },
+      { type: 'arabic', text: 'اَفَلَمْ يَسِيْرُوْا فِي الْاَرْضِ فَيَنْظُرُوْا كَيْفَ كَانَ عَاقِبَةُ الَّذِيْنَ مِنْ قَبْلِهِمْ ؕ دَمَّرَ اللّٰهُ عَلَيْهِمْ ۫ وَ لِلْكٰفِرِيْنَ اَمْثَالُهَا' },
+      { type: 'text', text: '10] So did they not travel in the land to see what sort of fate befell those who preceded them? Allah poured ruin upon them; and for the disbelievers are several like it.' },
+      { type: 'arabic', text: 'ذٰلِكَ بِاَنَّ اللّٰهَ مَوْلَى الَّذِيْنَ اٰمَنُوْا وَ اَنَّ الْكٰفِرِيْنَ لَا مَوْلٰی لَهُمْ' },
+      { type: 'text', text: '11] This is because Allah is the Supporter of the believers, whereas the disbelievers do not have any supporter.' },
+      { type: 'arabic', text: 'اِنَّ اللّٰهَ يُدْخِلُ الَّذِيْنَ اٰمَنُوْا وَ عَمِلُوا الصّٰلِحٰتِ جَنّٰتٍ تَجْرِيْ مِنْ تَحْتِهَا الْاَنْهٰرُ ؕ وَ الَّذِيْنَ كَفَرُوْا يَتَمَتَّعُوْنَ وَ يَاْكُلُوْنَ كَمَا تَاْكُلُ الْاَنْعَامُ وَ النَّارُ مَثْوًى لَّهُمْ' },
+      { type: 'text', text: '12] Allah will indeed admit those who believed and did good deeds into Gardens beneath which rivers flow; and the disbelievers enjoy, and they eat like the cattle eat, and their destination is in the fire.' },
+      { type: 'arabic', text: 'وَ كَاَيِّنْ مِّنْ قَرْيَةٍ هِيَ اَشَدُّ قُوَّةً مِّنْ قَرْيَتِكَ الَّتِيْۤ اَخْرَجَتْكَ ۚ اَهْلَكْنٰهُمْ فَلَا نَاصِرَ لَهُمْ' },
+      { type: 'text', text: '13] And many a township existed which was stronger than your town (O dear Prophet Mohammed - peace and blessings be upon him) - those who removed you from your town - We destroyed them, so they do not have a supporter!' },
+      { type: 'arabic', text: 'اَفَمَنْ كَانَ عَلٰی بَيِّنَةٍ مِّنْ رَّبِّهٖ كَمَنْ زُيِّنَ لَهٗ سُوْۤءُ عَمَلِهٖ وَ اتَّبَعُوْۤا اَهْوَآءَهُمْ' },
+      { type: 'text', text: '14] So will one who is upon on a clear proof from his Lord, ever be like any of those whose evil deeds are made to appear good to them and they follow their own desires?' },
+      { type: 'arabic', text: 'مَثَلُ الْجَنَّةِ الَّتِيْ وُعِدَ الْمُتَّقُوْنَ ؕ فِيْهَاۤ اَنْهٰرٌ مِّنْ مَّآءٍ غَيْرِ اٰسِنٍ ۚ وَ اَنْهٰرٌ مِّنْ لَّبَنٍ لَّمْ يَتَغَيَّرْ طَعْمُهٗ ۚ وَ اَنْهٰرٌ مِّنْ خَمْرٍ لَّذَّةٍ لِّلشّٰرِبِيْنَ ۚ وَ اَنْهٰرٌ مِّنْ عَسَلٍ مُّصَفًّى ؕ وَ لَهُمْ فِيْهَا مِنْ كُلِّ الثَّمَرٰتِ وَ مَغْفِرَةٌ مِّنْ رَّبِّهِمْ ؕ كَمَنْ هُوَ خَالِدٌ فِي النَّارِ وَ سُقُوْا مَآءً حَمِيْمًا فَقَطَّعَ اَمْعَآءَهُمْ' },
+      { type: 'text', text: '15] A description of the Garden which is promised to the pious; in it are rivers of water which shall never pollute; and rivers of milk the taste of which shall never change; and rivers of wine delicious to drink; and rivers of purified honey; and in it for them are fruits of all kinds, and the forgiveness of their Lord; so will such ever be equal to those who are to stay in the fire for ever and who will be given boiling water to drink so that it tears their guts apart?' },
+      { type: 'arabic', text: 'وَ مِنْهُمْ مَّنْ يَّسْتَمِعُ اِلَيْكَ ۚ حَتّٰۤى اِذَا خَرَجُوْا مِنْ عِنْدِكَ قَالُوْا لِلَّذِيْنَ اُوْتُوا الْعِلْمَ مَاذَا قَالَ اٰنِفًا ؕ اُولٰٓئِكَ الَّذِيْنَ طَبَعُ اللّٰهَ عَلٰی قُلُوْبِهِمْ وَ اتَّبَعُوْۤا اَهْوَآءَهُمْ' },
+      { type: 'text', text: '16] And among them are some who listen to what you say; until when they go away from you, they say to those who have been given knowledge, “What did he say now?”; they are those whose hearts Allah has sealed, and they follow their own desires.' },
+      { type: 'arabic', text: 'وَ الَّذِيْنَ اهْتَدَوْا زَادَهُمْ هُدًى وَّ اٰتٰىهُمْ تَقْوٰىهُمْ' },
+      { type: 'text', text: '17] And those who attained the right path - Allah increases the guidance for them and bestows their piety to them.' },
+      { type: 'arabic', text: 'فَهَلْ يَنْظُرُوْنَ اِلَّا السَّاعَةَ اَنْ تَاْتِيَهُمْ بَغْتَةً ۚ فَقَدْ جَآءَ اَشْرَاطُهَا ۚ فَاَنّٰى لَهُمْ اِذَا جَآءَتْهُمْ ذِكْرٰىهُمْ' },
+      { type: 'text', text: '18] So what are they waiting for, except that the Last Day suddenly come upon them? For its signs have already appeared; so when it does come, of what use is their realising it?' },
+      { type: 'arabic', text: 'فَاعْلَمْ اَنَّهٗ لَاۤ اِلٰهَ اِلَّا اللّٰهُ وَ اسْتَغْفِرْ لِذَنْۢبِكَ وَ لِلْمُؤْمِنِيْنَ وَ الْمُؤْمِنٰتِ ؕ وَ اللّٰهُ يَعْلَمُ مُتَقَلَّبَكُمْ وَ مَثْوٰىكُمْ' },
+      { type: 'text', text: '19] Therefore know (O dear Prophet Mohammed - peace and blessings be upon him) that there is none worthy of worship except Allah, and seek the forgiveness of sins of your close ones and for the common believing men and women; and Allah knows your movements during the day and your resting during the night.' },
+      { type: 'arabic', text: 'وَ يَقُوْلُ الَّذِيْنَ اٰمَنُوْا لَوْ لَا نُزِّلَتْ سُوْرَةٌ ۚ فَاِذَاۤ اُنْزِلَتْ سُوْرَةٌ مُّحْكَمَةٌ وَّ ذُكِرَ فِيْهَا الْقِتَالُ ۙ رَاَيْتَ الَّذِيْنَ فِيْ قُلُوْبِهِمْ مَّرَضٌ يَّنْظُرُوْنَ اِلَيْكَ نَظَرَ الْمَغْشِيِّ عَلَيْهِ مِنَ الْمَوْتِ ؕ فَاَوْلٰی لَهُمْ' },
+      { type: 'text', text: '20] And the Muslims say, “Why was not a chapter sent down?” So when a positive chapter was sent down, and war was commanded in it, you will see those in whose hearts is a disease looking at you with the dazed looks of a dying man; so it would be better for them. -' },
+      { type: 'arabic', text: 'طَاعَةٌ وَّ قَوْلٌ مَّعْرُوْفٌ ۚ فَاِذَا عَزَمَ الْاَمْرُ ۠ فَلَوْ صَدَقُوا اللّٰهَ لَكَانَ خَيْرًا لَّهُمْ' },
+      { type: 'text', text: '21] To obey and speak good; so when the manifest command came - it would have been better for them if they had remained faithful to Allah.' },
+      { type: 'arabic', text: 'فَهَلْ عَسَيْتُمْ اِنْ تَوَلَّيْتُمْ اَنْ تُفْسِدُوْا فِي الْاَرْضِ وَ تُقَطِّعُوْۤا اَرْحَامَكُمْ' },
+      { type: 'text', text: '22] So do you * portray that if you get governance, you would spread chaos in the land and sever your relations? (* The hypocrites)' },
+      { type: 'arabic', text: 'اُولٰٓئِكَ الَّذِيْنَ لَعَنَهُمُ اللّٰهُ فَاَصَمَّهُمْ وَ اَعْمٰی اَبْصَارَهُمْ' },
+      { type: 'text', text: '23] It is these whom Allah has cursed, so He made them deaf to the Truth and blinded their eyes.' },
+      { type: 'arabic', text: 'اَفَلَا يَتَدَبَّرُوْنَ الْقُرْاٰنَ اَمْ عَلٰی قُلُوْبٍ اَقْفَالُهَا' },
+      { type: 'text', text: '24] So do they not ponder the Qur’an deeply, or are there locks on some of their hearts?' },
+      { type: 'arabic', text: 'اِنَّ الَّذِيْنَ ارْتَدُّوْا عَلٰۤى اَدْبَارِهِمْ مِّنْۢ بَعْدِ مَا تَبَيَّنَ لَهُمُ الْهُدَى ۙ الشَّيْطٰنُ سَوَّلَ لَهُمْ ؕ وَ اَمْلٰی لَهُمْ' },
+      { type: 'text', text: '25] Indeed those who turn back after the guidance had become clear to them - Satan has deceived them; and made them optimistic of living for ages.' },
+      { type: 'arabic', text: 'ذٰلِكَ بِاَنَّهُمْ قَالُوْا لِلَّذِيْنَ كَرِهُوْا مَا نَزَّلَ اللّٰهُ سَنُطِيْعُكُمْ فِيْ بَعْضِ الْاَمْرِ ۖ وَ اللّٰهُ يَعْلَمُ اِسْرَارَهُمْ' },
+      { type: 'text', text: '26] This is because they said to those who dislike what Allah has sent down, “We will obey you regarding one matter *”; and Allah knows their secrets. (* To fight against the Holy Prophet).' },
+      { type: 'arabic', text: 'فَكَيْفَ اِذَا تَوَفَّتْهُمُ الْمَلٰٓئِكَةُ يَضْرِبُوْنَ وُجُوْهَهُمْ وَ اَدْبَارَهُمْ' },
+      { type: 'text', text: '27] So how (dreadful) will it be when the angels remove their souls, striking at their faces and their backs!' },
+      { type: 'arabic', text: 'ذٰلِكَ بِاَنَّهُمُ اتَّبَعُوْا مَاۤ اَسْخَطَ اللّٰهَ وَ كَرِهُوْا رِضْوَانَهٗ فَاَحْبَطَ اَعْمَالَهُمْ' },
+      { type: 'text', text: '28] This is because they followed the matter which displeases Allah, and they disliked what pleases Him - He therefore squandered away all their deeds.' },
+      { type: 'arabic', text: 'اَمْ حَسِبَ الَّذِيْنَ فِيْ قُلُوْبِهِمْ مَّرَضٌ اَنْ لَّنْ يُّخْرِجَ اللّٰهُ اَضْغَانَهُمْ' },
+      { type: 'text', text: '29] What! Do they, in whose hearts is a disease, fancy that Allah will not expose concealed enmities?' },
+      { type: 'arabic', text: 'وَ لَوْ نَشَآءُ لَاَرَيْنٰكَهُمْ فَلَعَرَفْتَهُمْ بِسِيْمٰهُمْ ؕ وَ لَتَعْرِفَنَّهُمْ فِيْ لَحْنِ الْقَوْلِ ؕ وَ اللّٰهُ يَعْلَمُ اَعْمَالَهُمْ' },
+      { type: 'text', text: '30] And if We will, We can show them to you so that you may recognise them by their faces; and you will surely recognise them by the way they talk; and Allah knows your deeds.' },
+      { type: 'arabic', text: 'وَ لَنَبْلُوَنَّكُمْ حَتّٰى نَعْلَمَ الْمُجٰهِدِيْنَ مِنْكُمْ وَ الصّٰبِرِيْنَ ۙ وَ نَبْلُوَا۟ اَخْبَارَكُمْ' },
+      { type: 'text', text: '31] And We shall indeed test you until We make known the warriors and the steadfast among you - and to test your proclamations.' },
+      { type: 'arabic', text: 'اِنَّ الَّذِيْنَ كَفَرُوْا وَ صَدُّوْا عَنْ سَبِيْلِ اللّٰهِ وَ شَآقُّوا الرَّسُوْلَ مِنْۢ بَعْدِ مَا تَبَيَّنَ لَهُمُ الْهُدٰی ۙ لَنْ يَّضُرُّوا اللّٰهَ شَيْئًا ؕ وَ سَيُحْبِطُ اَعْمَالَهُمْ' },
+      { type: 'text', text: '32] Indeed those who disbelieved and prevented others from Allah’s way, and opposed the Noble Messenger after the guidance had become clear to them - they cannot harm Allah in the least; and soon He will squander away their deeds.' },
+      { type: 'arabic', text: 'يٰۤاَيُّهَا الَّذِيْنَ اٰمَنُوْۤا اَطِيْعُوا اللّٰهَ وَ اَطِيْعُوا الرَّسُوْلَ وَ لَا تُبْطِلُوْۤا اَعْمَالَهُمْ' },
+      { type: 'text', text: '33] O People who Believe! Obey Allah and obey the Noble Messenger, and do not render your deeds void.' },
+      { type: 'arabic', text: 'اِنَّ الَّذِيْنَ كَفَرُوْا وَ صَدُّوْا عَنْ سَبِيْلِ اللّٰهِ ثُمَّ مَاتُوْا وَ هُمْ كُفَّارٌ فَلَنْ يَّغْفِرَ اللّٰهُ لَهُمْ' },
+      { type: 'text', text: '34] Indeed those who disbelieved and prevented others from Allah’s way, and then died as disbelievers - so Allah will never forgive them.' },
+      { type: 'arabic', text: 'فَلَا تَهِنُوْا وَ تَدْعُوْۤا اِلَى السَّلْمِ ۖ وَ اَنْتُمُ الْاَعْلَوْنَ ۖ وَ اللّٰهُ مَعَكُمْ وَ لَنْ يَّتِرَكُمْ اَعْمَالَهُمْ' },
+      { type: 'text', text: '35] Therefore do not relax, nor call towards truce by yourself; and it is you who will dominate; and Allah is with you, and He will never cause a loss in your deeds.' },
+      { type: 'arabic', text: 'اِنَّمَا الْحَيٰوةُ الدُّنْيَا لَعِبٌ وَّ لَهْوٌ ؕ وَ اِنْ تُؤْمِنُوْا وَ تَتَّقُوْا يُؤْتِكُمْ اُجُوْرَكُمْ وَ لَا يَسْـَٔلْكُمْ اَمْوَالَكُمْ' },
+      { type: 'text', text: '36] The worldly life is just a sport and pastime; and if you accept faith and be pious, He will bestow your rewards to you, and not at all ask you for your wealth.' },
+      { type: 'arabic', text: 'اِنْ يَّسْـَٔلْكُمُوْهَا فَيُحْفِكُمْ تَبْخَلُوْا وَ يُخْرِجْ اَضْغَانَكُمْ' },
+      { type: 'text', text: '37] Were He to ask it from you, and ask in plenty, you would be miserly, and the miserliness would expose the filth within your hearts.' },
+      { type: 'arabic', text: 'هٰۤاَنْتُمْ هٰۤؤُلَآءِ تُدْعَوْنَ لِتُنْفِقُوْا فِيْ سَبِيْلِ اللّٰهِ ۚ فَمِنْكُمْ مَّنْ يَّبْخَلُ ۚ وَ مَنْ يَّبْخَلْ فَاِنَّمَا يَبْخَلُ عَنْ نَّفْسِهٖ ؕ وَ اللّٰهُ الْغَنِيُّ وَ اَنْتُمُ الْفُقَرَآءُ ۚ وَ اِنْ تَتَوَلَّوْا يَسْتَبْدِلْ قَوْمًا غَيْرَكُمْ ۙ ثُمَّ لَا يَكُوْنُوْۤا اَمْثَالَكُمْ' },
+      { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'إِنَّا فَتَحْنَا لَكَ فَتْحًا مُّبِينًا' },
+      { type: 'text', text: '1] We have indeed, for your sake (O dear Prophet Mohammed - peace and blessings be upon him), bestowed a clear victory.' },
+      { type: 'arabic', text: 'لِّيَغْفِرَ لَكَ اللَّهُ مَا تَقَدَّمَ مِن ذَنبِكَ وَمَا تَأَخَّرَ وَيُتِمَّ نِعْمَتَهُ عَلَيْكَ وَيَهْدِيَكَ صِرَاطًا مُّسْتَقِيمًا' },
+      { type: 'text', text: '2] So that Allah may forgive, for your sake, the sins of those before you and those after you, and complete His favours upon you, and to show you the Straight Path.' },
+                { type: 'arabic', text: 'وَيَنصُرَكَ اللَّهُ نَصْرًا عَزِيزًا' },
+                { type: 'text', text: '3] And so that Allah may provide you a great help.' },
+                { type: 'arabic', text: 'هُوَ الَّذِي أَنزَلَ السَّكِينَةَ فِي قُلُوبِ الْمُؤْمِنِينَ لِيَزْدَادُوا إِيمَانًا مَّعَ إِيمَانِهِمْ ۖ وَلِلَّهِ جُنُودُ السَّمَاوَاتِ وَالْأَرْضِ ۚ وَكَانَ اللَّهُ عَلِيمًا حَكِيمًا' },
+                { type: 'text', text: '4] It is He Who instilled peace in the hearts of the believers, so that it may increase their strength of conviction; and to Allah only belong the armies of the heavens and the earth; and Allah is All Knowing, Wise.' },
+                { type: 'arabic', text: 'لِّيُدْخِلَ الْمُؤْمِنِينَ وَالْمُؤْمِنَاتِ جَنَّاتٍ تَجْرِي مِن تَحْتِهَا الْأَنْهَارُ خَالِدِينَ فِيهَا وَيُكَفِّرَ عَنْهُمْ سَيِّئَاتِهِمْ ۚ وَكَانَ ذَٰلِكَ عِندَ اللَّهِ فَوْزًا عَظِيمًا' },
+                { type: 'text', text: '5] In order to admit the believing men and believing women into Gardens beneath which rivers flow, in which they will abide, and to relieve them of their misdeeds; and this, in Allah’s sight, is the greatest success.' },
+                { type: 'arabic', text: 'وَيُعَذِّبَ الْمُنَافِقِينَ وَالْمُنَافِقَاتِ وَالْمُشْرِكِينَ وَالْمُشْرِكَاتِ الظَّانِّينَ بِاللَّهِ ظَنَّ السَّوْءِ ۚ عَلَيْهِمْ دَائِرَةُ السَّوْءِ ۖ وَغَضِبَ اللَّهُ عَلَيْهِمْ وَلَعَنَهُمْ وَأَعَدَّ لَهُمْ جَهَنَّمَ ۖ وَسَاءَتْ مَصِيرًا' },
+                { type: 'text', text: '6] And to punish the hypocrite men and hypocrite women, and the polytheist men and polytheist women, who think evilly about Allah; upon them only is the evil cycle of misfortune; and Allah has wreaked anger upon them, and has cursed them, and has prepared hell for them; and what an evil destination.' },
+                { type: 'arabic', text: 'وَلِلَّهِ جُنُودُ السَّمَاوَاتِ وَالْأَرْضِ ۚ وَكَانَ اللَّهُ عَزِيزًا حَكِيمًا' },
+                { type: 'text', text: '7] And to Allah only belong the armies of the heavens and the earth; and Allah is Most Honourable, Wise.' },
+                { type: 'arabic', text: 'إِنَّا أَرْسَلْنَاكَ شَاهِدًا وَمُبَشِّرًا وَنَذِيرًا' },
+                { type: 'text', text: '8] We have indeed sent you (O dear Prophet Mohammed - peace and blessings be upon him) as a present witness and a Herald of glad tidings and warnings. (The Holy Prophet is a witness from Allah.)' },
+                { type: 'arabic', text: 'لِّتُؤْمِنُوا بِاللَّهِ وَرَسُولِهِ وَتُعَزِّرُوهُ وَتُوَقِّرُوهُ وَتُسَبِّحُوهُ بُكْرَةً وَأَصِيلًا' },
+                { type: 'text', text: '9] In order that you, O people, may accept faith in Allah and His Noble Messenger, and honour and revere the Noble Messenger; and may say the Purity of Allah, morning and evening. (To honour the Holy Prophet – peace and blessings be upon him – is part of faith. To disrespect him is blasphemy.)' },
+                { type: 'arabic', text: 'إِنَّ الَّذِينَ يُبَايِعُونَكَ إِنَّمَا يُبَايِعُونَ اللَّهَ يَدُ اللَّهِ فَوْقَ أَيْدِيهِمْ ۚ فَمَن نَّكَثَ فَإِنَّمَا يَنكُثُ عَلَىٰ نَفْسِهِ ۖ وَمَنْ أَوْفَىٰ بِمَا عَاهَدَ عَلَيْهُ اللَّهَ فَسَيُؤْتِيهِ أَجْرًا عَظِيمًا' },
+                { type: 'text', text: "10] Those who swear allegiance to you (O dear Prophet Mohammed - peace and blessings be upon him), do indeed in fact swear allegiance to Allah; Allah's Hand* of Power is above their hands; so whoever breaches his oath, has breached his own greater promise; and whoever fulfils the covenant he has with Allah - so very soon Allah will bestow upon him a great reward. (Used as a metaphor.)" },
+                { type: 'hr' },
+                { type: 'arabic', text: 'سَيَقُولُ لَكَ الْمُخَلَّفُونَ مِنَ الْأَعْرَابِ شَغَلَتْنَا أَمْوَالُنَا وَأَهْلُونَا فَاسْتَغْفِرْ لَنَا ۚ يَقُولُونَ بِأَلْسِنَتِهِم مَّا لَيْسَ فِي قُلُوبِهِمْ ۚ قُلْ فَمَن يَمْلِكُ لَكُم مِّنَ اللَّهِ شَيْئًا إِنْ أَرَادَ بِكُمْ ضَرًّا أَوْ أَرَادَ بِكُمْ نَفْعًا ۚ بَلْ كَانَ اللَّهُ بِمَا تَعْمَلُونَ خَبِيرًا' },
+                { type: 'text', text: '11] The ignorant ones who had stayed behind will now say to you, “Our wealth and our families prevented us from going by keeping us pre-occupied, therefore seek forgiveness for us”; they utter with their tongues what is not in their hearts; say, “So does anyone have any control over you against Allah, if He wills to harm you or provide you benefit? In fact Allah is Aware of what you do.”' },
+                { type: 'arabic', text: 'بَلْ ظَنَنتُمْ أَن لَّن يَنقَلِبَ الرَّسُولُ وَالْمُؤْمِنُونَ إِلَىٰ أَهْلِيهِمْ أَبَدًا وَزُيِّنَ ذَٰلِكَ فِي قُلُوبِكُمْ وَظَنَنتُمْ ظَنَّ السَّوْءِ وَكُنتُمْ قَوْمًا بُورًا' },
+                { type: 'text', text: '12] “Rather you had assumed that the Noble Messenger and the Muslims will never return to their homes, and you thought this as good within your hearts, whereas you had thought evilly; and you were a people about to be ruined.”' },
+                { type: 'arabic', text: 'وَمَن لَّمْ يُؤْمِن بِاللَّهِ وَرَسُولِهِ فَإِنَّا أَعْتَدْنَا لِلْكَافِرِينَ سَعِيرًا' },
+                { type: 'text', text: '13] And whoever does not accept faith in Allah and His Noble Messenger - We have indeed kept prepared a blazing fire for disbelievers.' },
+                { type: 'arabic', text: 'وَلِلَّهِ مُلْكُ السَّمَاوَاتِ وَالْأَرْضِ ۚ يَغْفِرُ لِمَن يَشَاءُ وَيُعَذِّبُ مَن يَشَاءُ ۚ وَكَانَ اللَّهُ غَفُورًا رَّحِيمًا' },
+                { type: 'text', text: '14] And for Allah only is the kingship of the heavens and the earth; He may forgive whomever He wills, and punish whomever He wills; and Allah is Oft Forgiving, Most Merciful.' },
+                { type: 'arabic', text: 'سَيَقُولُ الْمُخَلَّفُونَ إِذَا انطَلَقْتُمْ إِلَىٰ مَغَانِمَ لِتَأْخُذُوهَا ذَرُونَا نَتَّبِعْكُمْ ۖ يُرِيدُونَ أَن يُبَدِّلُوا كَلَامَ اللَّهِ ۚ قُل لَّن تَتَّبِعُونَا كَذَٰلِكُمْ قَالَ اللَّهُ مِن قَبْلُ ۖ فَسَيَقُولُونَ بَلْ تَحْسُدُونَا ۚ بَلْ كَانُوا لَا يَفْقَهُونَ إِلَّا قَلِيلًا' },
+                { type: 'text', text: '15] Those who had stayed behind will now say, “When you go to receive the war booty, let us also go with you”; they wish to change the Words of Allah; say “You shall never come with us - this is already decreed by Allah”; so they will now say, “But rather you envy us”; in fact they never understood except a little.' },
+                { type: 'arabic', text: 'قُل لِّلْمُخَلَّفِينَ مِنَ الْأَعْرَابِ سَتُدْعَوْنَ إِلَىٰ قَوْمٍ أُولِي بَأْسٍ شَدِيدٍ تُقَاتِلُونَهُمْ أَوْ يُسْلِمُونَ ۖ فَإِن تُطِيعُوا يُؤْتِكُمُ اللَّهُ أَجْرًا حَسَنًا ۖ وَإِن تَتَوَلَّوْا كَمَا تَوَلَّيْتُم مِّن قَبْلُ يُعَذِّبْكُمْ عَذَابًا أَلِيمًا' },
+                { type: 'text', text: '16] Say to the ignorant who stayed behind, “You will soon be called against a nation of great military strength - to fight against them or that they become Muslims; so if you obey, Allah will give you an excellent reward; and if you turn away, the way you had turned away before, He will mete out a painful punishment to you.”' },
+                { type: 'arabic', text: 'لَّيْسَ عَلَى الْأَعْمَىٰ حَرَجٌ وَلَا عَلَى الْأَعْرَجِ حَرَجٌ وَلَا عَلَى الْمَرِيضِ حَرَجٌ ۗ وَمَن يُطِعِ اللَّهَ وَرَسُولَهُ يُدْخِلْهُ جَنَّاتٍ تَجْرِي مِن تَحْتِهَا الْأَنْهَارُ ۖ وَمَن يَتَوَلَّ يُعَذِّبْهُ عَذَابًا أَلِيمًا' },
+                { type: 'text', text: '17] There is no reproach upon the blind, nor reproach against the lame, nor reproach upon the sick; and whoever obeys Allah and His Noble Messenger - Allah will admit him into Gardens beneath which rivers flow; and whoever turns away - He will mete out a painful punishment to him.' },
+                { type: 'hr' },
+                { type: 'arabic', text: 'لَّقَدْ رَضِيَ اللَّهُ عَنِ الْمُؤْمِنِينَ إِذْ يُبَايِعُونَكَ تَحْتَ الشَّجَرَةِ فَعَلِمَ مَا فِي قُلُوبِهِمْ فَأَنزَلَ السَّكِينَةَ عَلَيْهِمْ وَأَثَابَهُمْ فَتْحًا قَرِيبًا' },
+                { type: 'text', text: '18] Indeed Allah was truly pleased with the believers when they swore allegiance to you beneath the tree - so He knew what was in their hearts - He therefore sent down peace upon them, and rewarded them with an imminent victory.' },
+                { type: 'arabic', text: 'وَمَغَانِمَ كَثِيرَةً يَأْخُذُونَهَا ۗ وَكَانَ اللَّهُ عَزِيزًا حَكِيمًا' },
+                { type: 'text', text: '19] And plenty of war booty, to take; and Allah is Most Honourable, Wise.' },
+                { type: 'arabic', text: 'وَعَدَكُمُ اللَّهُ مَغَانِمَ كَثِيرَةً تَأْخُذُونَهَا فَعَجَّلَ لَكُمْ هَٰذِهِ وَكَفَّ أَيْدِيَ النَّاسِ عَنكُمْ وَلِتَكُونَ آيَةً لِّلْمُؤْمِنِينَ وَيَهْدِيَكُمْ صِرَاطًا مُّسْتَقِيمًا' },
+                { type: 'text', text: '20] Allah has promised you plenty of booty which you will take, and has bestowed this to you quickly, and restrained peoples’ hands from you; and in order that it may be a sign for the believers, and to guide you on the Straight Path.' },
+                { type: 'arabic', text: 'وَأُخْرَىٰ لَمْ تَقْدِرُوا عَلَيْهَا قَدْ أَحَاطَ اللَّهُ بِهَا ۚ وَكَانَ اللَّهُ عَلَىٰ كُلِّ شَيْءٍ قَدِيرًا' },
+                { type: 'text', text: '21] And one more, not within your capacity, is within Allah’s hold; and Allah is Able to do all things.' },
+                { type: 'arabic', text: 'وَلَوْ قَاتَلَكُمُ الَّذِينَ كَفَرُوا لَوَلَّوُا الْأَدْبَارَ ثُمَّ لَا يَجِدُونَ وَلِيًّا وَلَا نَصِيرًا' },
+                { type: 'text', text: '22] And if the disbelievers were to fight you, they will turn away and flee, and then they will not find any supporter nor any aide.' },
+                { type: 'arabic', text: 'سُنَّةَ اللَّهِ الَّتِي قَدْ خَلَتْ مِن قَبْلُ ۖ وَلَن تَجِدَ لِسُنَّةِ اللَّهِ تَبْدِيلاً' },
+                { type: 'text', text: '23] The tradition of Allah, ongoing since before; and you will not find the tradition of Allah changing.' },
+                { type: 'arabic', text: 'وَهُوَ الَّذِي كَفَّ أَيْدِيَهُمْ عَنكُمْ وَأَيْدِيَكُمْ عَنْهُم بِبَطْنِ مَكَّةَ مِن بَعْدِ أَنْ أَظْفَرَكُمْ عَلَيْهِمْ ۚ وَكَانَ اللَّهُ بِمَا تَعْمَلُونَ بَصِيرًا' },
+                { type: 'text', text: '24] And it is He Who restrained their hands from you, and your hands from them in the valley of Mecca, after having given you control over them; and Allah sees all what you do.' },
+                { type: 'arabic', text: 'هُمُ الَّذِينَ كَفَرُوا وَصَدُّوكُمْ عَنِ الْمَسْجِدِ الْحَرَامِ وَالْهَدْيَ مَعْكُوفًا أَن يَبْلُغَ مَحِلَّهُ ۚ وَلَوْلَا رِجَالٌ مُّؤْمِنُونَ وَنِسَاءٌ مُّؤْمِنَاتٌ لَّمْ تَعْلَمُوهُمْ أَن تَطَؤُوهُمْ فَتُصِيبَكُم مِّنْهُم مَّعَرَّةٌ بِغَيْرِ عِلْمٍ ۖ لِّيُدْخِلَ اللَّهُ فِي رَحْمَتِهِ مَن يَشَاءُ ۚ لَوْ تَزَيَّلُوا لَعَذَّبْنَا الَّذِينَ كَفَرُوا مِنْهُمْ عَذَابًا أَلِيمًا' },
+                { type: 'text', text: '25] It was these who disbelieved and prevented you from the Sacred Mosque, and stopped the sacrificial animals from reaching their place; and were it not for some Muslim men and Muslim women, whom you do not know - lest you may crush them and unintentionally incur some violation due to them - Allah would have permitted you to slay them; this relief for them, is so that Allah may admit into His mercy whomever He wills; and had they been separated, We would have indeed punished the disbelievers among them with a painful punishment.' },
+                { type: 'hr' },
+                { type: 'arabic', text: 'إِذْ جَعَلَ الَّذِينَ كَفَرُوا فِي قُلُوبِهِمُ الْحَمِيَّةَ حَمِيَّةَ الْجَاهِلِيَّةِ فَأَنزَلَ اللَّهُ سَكِينَتَهُ عَلَىٰ رَسُولِهِ وَعَلَى الْمُؤْمِنِينَ وَأَلْزَمَهُمْ كَلِمَةَ التَّقْوَىٰ وَكَانُوا أَحَقَّ بِهَا وَأَهْلَهَا ۚ وَكَانَ اللَّهُ بِكُلِّ شَيْءٍ عَلِيمًا' },
+                { type: 'text', text: '26] Whereas the disbelievers had set up in their hearts an obstinacy - the same obstacy of the days of ignorance - so Allah sent down His solace upon His Noble Messenger and upon the believers, and decreed upon them the words of piety, and they were more deserving and suitable for it; and Allah is the All Knowing.' },
+                { type: 'arabic', text: 'لَّقَدْ صَدَقَ اللَّهُ رَسُولَهُ الرُّؤْيَا بِالْحَقِّ ۖ لَتَدْخُلُنَّ الْمَسْجِدَ الْحَرَامَ إِن شَاءَ اللَّهُ آمِنِينَ مُحَلِّقِينَ رُءُوسَكُمْ وَمُقَصِّرِينَ لَا تَخَافُونَ ۖ فَعَلِمَ مَا لَمْ تَعْلَمُوا فَجَعَلَ مِن دُونِ ذَٰلِكَ فَتْحًا قَرِيبًا' },
+                { type: 'text', text: '27] Allah has indeed made the truthful dream of His Noble Messenger, come true; indeed you will all enter the Sacred Mosque, if Allah wills, in safety - with your heads shaven or hair cut short - without fear; so He knows what you do not know, and has therefore ordained another imminent victory before this.' },
+                { type: 'arabic', text: 'هُوَ الَّذِي أَرْسَلَ رَسُولَهُ بِالْهُدَىٰ وَدِينِ الْحَقِّ لِيُظْهِرَهُ عَلَى الدِّينِ كُلِّهِ ۚ وَكَفَىٰ بِاللَّهِ شَهِيدًا' },
+                { type: 'text', text: '28] It is He Who has sent His Noble Messenger with the guidance and the true religion, in order to make it prevail over all other religions; and Allah is sufficient as a Witness. (The Holy Prophet is a light from Allah.)' },
+                { type: 'arabic', text: 'مُّحَمَّدٌ رَّسُولُ اللَّهِ ۚ وَالَّذِينَ مَعَهُ أَشِدَّاءُ عَلَى الْكُفَّارِ رُحَمَاءُ بَيْنَهُمْ ۖ تَرَاهُمْ رُكَّعًا سُجَّدًا يَبْتَغُونَ فَضْلًا مِّنَ اللَّهِ وَرِضْوَانًا ۖ سِيمَاهُمْ فِي وُجُوهِهِم مِّنْ أَثَرِ السُّجُودِ ۚ ذَٰلِكَ مَثَلُهُمْ فِي التَّوْرَاةِ ۚ وَمَثَلُهُمْ فِي الْإِنجِيلِ كَزَرْعٍ أَخْرَجَ شَطْأَهُ فَآزَرَهُ فَاسْتَغْلَظَ فَاسْتَوَىٰ عَلَىٰ سُوقِهِ يُعْجِبُ الزُّرَّاعَ لِيَغِيظَ بِهِمُ الْكُفَّارَ ۗ وَعَدَ اللَّهُ الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ مِنْهُم مَّغْفِرَةً وَأَجْرًا عَظِيمًا' },
+                { type: 'text', text: '29] Mohammed (peace and blessings be upon him) is the Noble Messenger of Allah; and his companions are stern with the disbelievers and merciful among themselves - you will see them bowing and falling in prostration, seeking Allah’s munificence and His pleasure; their signs are on their faces, from the effects of prostrations; this trait of theirs is mentioned in the Taurat; and their trait is mentioned in the Injeel; like a cultivation that sprouted its shoot, then strengthened it, then thickened and then stood firm upon its stem, pleasing the farmer - in order to enrage the disbelievers with them; Allah has promised forgiveness and a great reward to those among them who have faith and do good deeds.' }
+            ]
+        },
+
+        {
+            id: 48, name: "AL FATH", ar: "الفتح", juz: 26,
+            audio: 'https://server10.mp3quran.net/minsh/048.mp3',
+            content: [
+                { type: 'section-title', text: 'AL FATH (THE VICTORY)' },
+                { type: 'text', text: '(Revealed at Medinah - contains 29 verses - Para 48)' },
+                { type: 'arabic', text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ' },
+                { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'إِنَّا فَتَحْنَا لَكَ فَتْحًا مُّبِينًا' },
+      { type: 'text', text: '1] We have indeed, for your sake (O dear Prophet Mohammed - peace and blessings be upon him), bestowed a clear victory.' },
+      { type: 'arabic', text: 'لِّيَغْفِرَ لَكَ اللَّهُ مَا تَقَدَّمَ مِن ذَنبِكَ وَمَا تَأَخَّرَ وَيُتِمَّ نِعْمَتَهُ عَلَيْكَ وَيَهْدِيَكَ صِرَاطًا مُّسْتَقِيمًا' },
+      { type: 'text', text: '2] So that Allah may forgive, for your sake, the sins of those before you and those after you, and complete His favours upon you, and to show you the Straight Path.' },
+                { type: 'arabic', text: 'وَيَنصُرَكَ اللَّهُ نَصْرًا عَزِيزًا' },
+                { type: 'text', text: '3] And so that Allah may provide you a great help.' },
+                { type: 'arabic', text: 'هُوَ الَّذِي أَنزَلَ السَّكِينَةَ فِي قُلُوبِ الْمُؤْمِنِينَ لِيَزْدَادُوا إِيمَانًا مَّعَ إِيمَانِهِمْ ۖ وَلِلَّهِ جُنُودُ السَّمَاوَاتِ وَالْأَرْضِ ۚ وَكَانَ اللَّهُ عَلِيمًا حَكِيمًا' },
+                { type: 'text', text: '4] It is He Who instilled peace in the hearts of the believers, so that it may increase their strength of conviction; and to Allah only belong the armies of the heavens and the earth; and Allah is All Knowing, Wise.' },
+                { type: 'arabic', text: 'لِّيُدْخِلَ الْمُؤْمِنِينَ وَالْمُؤْمِنَاتِ جَنَّاتٍ تَجْرِي مِن تَحْتِهَا الْأَنْهَارُ خَالِدِينَ فِيهَا وَيُكَفِّرَ عَنْهُمْ سَيِّئَاتِهِمْ ۚ وَكَانَ ذَٰلِكَ عِندَ اللَّهِ فَوْزًا عَظِيمًا' },
+                { type: 'text', text: '5] In order to admit the believing men and believing women into Gardens beneath which rivers flow, in which they will abide, and to relieve them of their misdeeds; and this, in Allah’s sight, is the greatest success.' },
+                { type: 'arabic', text: 'وَيُعَذِّبَ الْمُنَافِقِينَ وَالْمُنَافِقَاتِ وَالْمُشْرِكِينَ وَالْمُشْرِكَاتِ الظَّانِّينَ بِاللَّهِ ظَنَّ السَّوْءِ ۚ عَلَيْهِمْ دَائِرَةُ السَّوْءِ ۖ وَغَضِبَ اللَّهُ عَلَيْهِمْ وَلَعَنَهُمْ وَأَعَدَّ لَهُمْ جَهَنَّمَ ۖ وَسَاءَتْ مَصِيرًا' },
+                { type: 'text', text: '6] And to punish the hypocrite men and hypocrite women, and the polytheist men and polytheist women, who think evilly about Allah; upon them only is the evil cycle of misfortune; and Allah has wreaked anger upon them, and has cursed them, and has prepared hell for them; and what an evil destination.' },
+                { type: 'arabic', text: 'وَلِلَّهِ جُنُودُ السَّمَاوَاتِ وَالْأَرْضِ ۚ وَكَانَ اللَّهُ عَزِيزًا حَكِيمًا' },
+                { type: 'text', text: '7] And to Allah only belong the armies of the heavens and the earth; and Allah is Most Honourable, Wise.' },
+                { type: 'arabic', text: 'إِنَّا أَرْسَلْنَاكَ شَاهِدًا وَمُبَشِّرًا وَنَذِيرًا' },
+                { type: 'text', text: '8] We have indeed sent you (O dear Prophet Mohammed - peace and blessings be upon him) as a present witness and a Herald of glad tidings and warnings. (The Holy Prophet is a witness from Allah.)' },
+                { type: 'arabic', text: 'لِّتُؤْمِنُوا بِاللَّهِ وَرَسُولِهِ وَتُعَزِّرُوهُ وَتُوَقِّرُوهُ وَتُسَبِّحُوهُ بُكْرَةً وَأَصِيلًا' },
+                { type: 'text', text: '9] In order that you, O people, may accept faith in Allah and His Noble Messenger, and honour and revere the Noble Messenger; and may say the Purity of Allah, morning and evening. (To honour the Holy Prophet – peace and blessings be upon him – is part of faith. To disrespect him is blasphemy.)' },
+                { type: 'arabic', text: 'إِنَّ الَّذِينَ يُبَايِعُونَكَ إِنَّمَا يُبَايِعُونَ اللَّهَ يَدُ اللَّهِ فَوْقَ أَيْدِيهِمْ ۚ فَمَن نَّكَثَ فَإِنَّمَا يَنكُثُ عَلَىٰ نَفْسِهِ ۖ وَمَنْ أَوْفَىٰ بِمَا عَاهَدَ عَلَيْهُ اللَّهَ فَسَيُؤْتِيهِ أَجْرًا عَظِيمًا' },
+                { type: 'text', text: "10] Those who swear allegiance to you (O dear Prophet Mohammed - peace and blessings be upon him), do indeed in fact swear allegiance to Allah; Allah's Hand* of Power is above their hands; so whoever breaches his oath, has breached his own greater promise; and whoever fulfils the covenant he has with Allah - so very soon Allah will bestow upon him a great reward. (Used as a metaphor.)" },
+                { type: 'hr' },
+                { type: 'arabic', text: 'سَيَقُولُ لَكَ الْمُخَلَّفُونَ مِنَ الْأَعْرَابِ شَغَلَتْنَا أَمْوَالُنَا وَأَهْلُونَا فَاسْتَغْفِرْ لَنَا ۚ يَقُولُونَ بِأَلْسِنَتِهِم مَّا لَيْسَ فِي قُلُوبِهِمْ ۚ قُلْ فَمَن يَمْلِكُ لَكُم مِّنَ اللَّهِ شَيْئًا إِنْ أَرَادَ بِكُمْ ضَرًّا أَوْ أَرَادَ بِكُمْ نَفْعًا ۚ بَلْ كَانَ اللَّهُ بِمَا تَعْمَلُونَ خَبِيرًا' },
+                { type: 'text', text: '11] The ignorant ones who had stayed behind will now say to you, “Our wealth and our families prevented us from going by keeping us pre-occupied, therefore seek forgiveness for us”; they utter with their tongues what is not in their hearts; say, “So does anyone have any control over you against Allah, if He wills to harm you or provide you benefit? In fact Allah is Aware of what you do.”' },
+                { type: 'arabic', text: 'بَلْ ظَنَنتُمْ أَن لَّن يَنقَلِبَ الرَّسُولُ وَالْمُؤْمِنُونَ إِلَىٰ أَهْلِيهِمْ أَبَدًا وَزُيِّنَ ذَٰلِكَ فِي قُلُوبِكُمْ وَظَنَنتُمْ ظَنَّ السَّوْءِ وَكُنتُمْ قَوْمًا بُورًا' },
+                { type: 'text', text: '12] “Rather you had assumed that the Noble Messenger and the Muslims will never return to their homes, and you thought this as good within your hearts, whereas you had thought evilly; and you were a people about to be ruined.”' },
+                { type: 'arabic', text: 'وَمَن لَّمْ يُؤْمِن بِاللَّهِ وَرَسُولِهِ فَإِنَّا أَعْتَدْنَا لِلْكَافِرِينَ سَعِيرًا' },
+                { type: 'text', text: '13] And whoever does not accept faith in Allah and His Noble Messenger - We have indeed kept prepared a blazing fire for disbelievers.' },
+                { type: 'arabic', text: 'وَلِلَّهِ مُلْكُ السَّمَاوَاتِ وَالْأَرْضِ ۚ يَغْفِرُ لِمَن يَشَاءُ وَيُعَذِّبُ مَن يَشَاءُ ۚ وَكَانَ اللَّهُ غَفُورًا رَّحِيمًا' },
+                { type: 'text', text: '14] And for Allah only is the kingship of the heavens and the earth; He may forgive whomever He wills, and punish whomever He wills; and Allah is Oft Forgiving, Most Merciful.' },
+                { type: 'arabic', text: 'سَيَقُولُ الْمُخَلَّفُونَ إِذَا انطَلَقْتُمْ إِلَىٰ مَغَانِمَ لِتَأْخُذُوهَا ذَرُونَا نَتَّبِعْكُمْ ۖ يُرِيدُونَ أَن يُبَدِّلُوا كَلَامَ اللَّهِ ۚ قُل لَّن تَتَّبِعُونَا كَذَٰلِكُمْ قَالَ اللَّهُ مِن قَبْلُ ۖ فَسَيَقُولُونَ بَلْ تَحْسُدُونَا ۚ بَلْ كَانُوا لَا يَفْقَهُونَ إِلَّا قَلِيلًا' },
+                { type: 'text', text: '15] Those who had stayed behind will now say, “When you go to receive the war booty, let us also go with you”; they wish to change the Words of Allah; say “You shall never come with us - this is already decreed by Allah”; so they will now say, “But rather you envy us”; in fact they never understood except a little.' },
+                { type: 'arabic', text: 'قُل لِّلْمُخَلَّفِينَ مِنَ الْأَعْرَابِ سَتُدْعَوْنَ إِلَىٰ قَوْمٍ أُولِي بَأْسٍ شَدِيدٍ تُقَاتِلُونَهُمْ أَوْ يُسْلِمُونَ ۖ فَإِن تُطِيعُوا يُؤْتِكُمُ اللَّهُ أَجْرًا حَسَنًا ۖ وَإِن تَتَوَلَّوْا كَمَا تَوَلَّيْتُم مِّن قَبْلُ يُعَذِّبْكُمْ عَذَابًا أَلِيمًا' },
+                { type: 'text', text: '16] Say to the ignorant who stayed behind, “You will soon be called against a nation of great military strength - to fight against them or that they become Muslims; so if you obey, Allah will give you an excellent reward; and if you turn away, the way you had turned away before, He will mete out a painful punishment to you.”' },
+                { type: 'arabic', text: 'لَّيْسَ عَلَى الْأَعْمَىٰ حَرَجٌ وَلَا عَلَى الْأَعْرَجِ حَرَجٌ وَلَا عَلَى الْمَرِيضِ حَرَجٌ ۗ وَمَن يُطِعِ اللَّهَ وَرَسُولَهُ يُدْخِلْهُ جَنَّاتٍ تَجْرِي مِن تَحْتِهَا الْأَنْهَارُ ۖ وَمَن يَتَوَلَّ يُعَذِّبْهُ عَذَابًا أَلِيمًا' },
+                { type: 'text', text: '17] There is no reproach upon the blind, nor reproach against the lame, nor reproach upon the sick; and whoever obeys Allah and His Noble Messenger - Allah will admit him into Gardens beneath which rivers flow; and whoever turns away - He will mete out a painful punishment to him.' },
+                { type: 'hr' },
+                { type: 'arabic', text: 'لَّقَدْ رَضِيَ اللَّهُ عَنِ الْمُؤْمِنِينَ إِذْ يُبَايِعُونَكَ تَحْتَ الشَّجَرَةِ فَعَلِمَ مَا فِي قُلُوبِهِمْ فَأَنزَلَ السَّكِينَةَ عَلَيْهِمْ وَأَثَابَهُمْ فَتْحًا قَرِيبًا' },
+                { type: 'text', text: '18] Indeed Allah was truly pleased with the believers when they swore allegiance to you beneath the tree - so He knew what was in their hearts - He therefore sent down peace upon them, and rewarded them with an imminent victory.' },
+                { type: 'arabic', text: 'وَمَغَانِمَ كَثِيرَةً يَأْخُذُونَهَا ۗ وَكَانَ اللَّهُ عَزِيزًا حَكِيمًا' },
+                { type: 'text', text: '19] And plenty of war booty, to take; and Allah is Most Honourable, Wise.' },
+                { type: 'arabic', text: 'وَعَدَكُمُ اللَّهُ مَغَانِمَ كَثِيرَةً تَأْخُذُونَهَا فَعَجَّلَ لَكُمْ هَٰذِهِ وَكَفَّ أَيْدِيَ النَّاسِ عَنكُمْ وَلِتَكُونَ آيَةً لِّلْمُؤْمِنِينَ وَيَهْدِيَكُمْ صِرَاطًا مُّسْتَقِيمًا' },
+                { type: 'text', text: '20] Allah has promised you plenty of booty which you will take, and has bestowed this to you quickly, and restrained peoples’ hands from you; and in order that it may be a sign for the believers, and to guide you on the Straight Path.' },
+                { type: 'arabic', text: 'وَأُخْرَىٰ لَمْ تَقْدِرُوا عَلَيْهَا قَدْ أَحَاطَ اللَّهُ بِهَا ۚ وَكَانَ اللَّهُ عَلَىٰ كُلِّ شَيْءٍ قَدِيرًا' },
+                { type: 'text', text: '21] And one more, not within your capacity, is within Allah’s hold; and Allah is Able to do all things.' },
+                { type: 'arabic', text: 'وَلَوْ قَاتَلَكُمُ الَّذِينَ كَفَرُوا لَوَلَّوُا الْأَدْبَارَ ثُمَّ لَا يَجِدُونَ وَلِيًّا وَلَا نَصِيرًا' },
+                { type: 'text', text: '22] And if the disbelievers were to fight you, they will turn away and flee, and then they will not find any supporter nor any aide.' },
+                { type: 'arabic', text: 'سُنَّةَ اللَّهِ الَّتِي قَدْ خَلَتْ مِن قَبْلُ ۖ وَلَن تَجِدَ لِسُنَّةِ اللَّهِ تَبْدِيلاً' },
+                { type: 'text', text: '23] The tradition of Allah, ongoing since before; and you will not find the tradition of Allah changing.' },
+                { type: 'arabic', text: 'وَهُوَ الَّذِي كَفَّ أَيْدِيَهُمْ عَنكُمْ وَأَيْدِيَكُمْ عَنْهُم بِبَطْنِ مَكَّةَ مِن بَعْدِ أَنْ أَظْفَرَكُمْ عَلَيْهِمْ ۚ وَكَانَ اللَّهُ بِمَا تَعْمَلُونَ بَصِيرًا' },
+                { type: 'text', text: '24] And it is He Who restrained their hands from you, and your hands from them in the valley of Mecca, after having given you control over them; and Allah sees all what you do.' },
+                { type: 'arabic', text: 'هُمُ الَّذِينَ كَفَرُوا وَصَدُّوكُمْ عَنِ الْمَسْجِدِ الْحَرَامِ وَالْهَدْيَ مَعْكُوفًا أَن يَبْلُغَ مَحِلَّهُ ۚ وَلَوْلَا رِجَالٌ مُّؤْمِنُونَ وَنِسَاءٌ مُّؤْمِنَاتٌ لَّمْ تَعْلَمُوهُمْ أَن تَطَؤُوهُمْ فَتُصِيبَكُم مِّنْهُم مَّعَرَّةٌ بِغَيْرِ عِلْمٍ ۖ لِّيُدْخِلَ اللَّهُ فِي رَحْمَتِهِ مَن يَشَاءُ ۚ لَوْ تَزَيَّلُوا لَعَذَّبْنَا الَّذِينَ كَفَرُوا مِنْهُمْ عَذَابًا أَلِيمًا' },
+                { type: 'text', text: '25] It was these who disbelieved and prevented you from the Sacred Mosque, and stopped the sacrificial animals from reaching their place; and were it not for some Muslim men and Muslim women, whom you do not know - lest you may crush them and unintentionally incur some violation due to them - Allah would have permitted you to slay them; this relief for them, is so that Allah may admit into His mercy whomever He wills; and had they been separated, We would have indeed punished the disbelievers among them with a painful punishment.' },
+                { type: 'hr' },
+                { type: 'arabic', text: 'إِذْ جَعَلَ الَّذِينَ كَفَرُوا فِي قُلُوبِهِمُ الْحَمِيَّةَ حَمِيَّةَ الْجَاهِلِيَّةِ فَأَنزَلَ اللَّهُ سَكِينَتَهُ عَلَىٰ رَسُولِهِ وَعَلَى الْمُؤْمِنِينَ وَأَلْزَمَهُمْ كَلِمَةَ التَّقْوَىٰ وَكَانُوا أَحَقَّ بِهَا وَأَهْلَهَا ۚ وَكَانَ اللَّهُ بِكُلِّ شَيْءٍ عَلِيمًا' },
+                { type: 'text', text: '26] Whereas the disbelievers had set up in their hearts an obstinacy - the same obstacy of the days of ignorance - so Allah sent down His solace upon His Noble Messenger and upon the believers, and decreed upon them the words of piety, and they were more deserving and suitable for it; and Allah is the All Knowing.' },
+                { type: 'arabic', text: 'لَّقَدْ صَدَقَ اللَّهُ رَسُولَهُ الرُّؤْيَا بِالْحَقِّ ۖ لَتَدْخُلُنَّ الْمَسْجِدَ الْحَرَامَ إِن شَاءَ اللَّهُ آمِنِينَ مُحَلِّقِينَ رُءُوسَكُمْ وَمُقَصِّرِينَ لَا تَخَافُونَ ۖ فَعَلِمَ مَا لَمْ تَعْلَمُوا فَجَعَلَ مِن دُونِ ذَٰلِكَ فَتْحًا قَرِيبًا' },
+                { type: 'text', text: '27] Allah has indeed made the truthful dream of His Noble Messenger, come true; indeed you will all enter the Sacred Mosque, if Allah wills, in safety - with your heads shaven or hair cut short - without fear; so He knows what you do not know, and has therefore ordained another imminent victory before this.' },
+                { type: 'arabic', text: 'هُوَ الَّذِي أَرْسَلَ رَسُولَهُ بِالْهُدَىٰ وَدِينِ الْحَقِّ لِيُظْهِرَهُ عَلَى الدِّينِ كُلِّهِ ۚ وَكَفَىٰ بِاللَّهِ شَهِيدًا' },
+                { type: 'text', text: '28] It is He Who has sent His Noble Messenger with the guidance and the true religion, in order to make it prevail over all other religions; and Allah is sufficient as a Witness. (The Holy Prophet is a light from Allah.)' },
+                { type: 'arabic', text: 'مُّحَمَّدٌ رَّسُولُ اللَّهِ ۚ وَالَّذِينَ مَعَهُ أَشِدَّاءُ عَلَى الْكُفَّارِ رُحَمَاءُ بَيْنَهُمْ ۖ تَرَاهُمْ رُكَّعًا سُجَّدًا يَبْتَغُونَ فَضْلًا مِّنَ اللَّهِ وَرِضْوَانًا ۖ سِيمَاهُمْ فِي وُجُوهِهِم مِّنْ أَثَرِ السُّجُودِ ۚ ذَٰلِكَ مَثَلُهُمْ فِي التَّوْرَاةِ ۚ وَمَثَلُهُمْ فِي الْإِنجِيلِ كَزَرْعٍ أَخْرَجَ شَطْأَهُ فَآزَرَهُ فَاسْتَغْلَظَ فَاسْتَوَىٰ عَلَىٰ سُوقِهِ يُعْجِبُ الزُّرَّاعَ لِيَغِيظَ بِهِمُ الْكُفَّارَ ۗ وَعَدَ اللَّهُ الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ مِنْهُم مَّغْفِرَةً وَأَجْرًا عَظِيمًا' },
+                { type: 'text', text: '29] Mohammed (peace and blessings be upon him) is the Noble Messenger of Allah; and his companions are stern with the disbelievers and merciful among themselves - you will see them bowing and falling in prostration, seeking Allah’s munificence and His pleasure; their signs are on their faces, from the effects of prostrations; this trait of theirs is mentioned in the Taurat; and their trait is mentioned in the Injeel; like a cultivation that sprouted its shoot, then strengthened it, then thickened and then stood firm upon its stem, pleasing the farmer - in order to enrage the disbelievers with them; Allah has promised forgiveness and a great reward to those among them who have faith and do good deeds.' }
+            ]
+        },
+
+        {
+            id: 49, name: "AL HUJURAT", ar: "الحجرات", juz: 26,
+            audio: 'https://server10.mp3quran.net/minsh/049.mp3',
+            content: [
+                { type: 'section-title', text: 'AL HUJURAT (THE CHAMBERS)' },
+                { type: 'text', text: '(Revealed at Medinah - 18 verses)' },
+                { type: 'arabic', text: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ' },
+                { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'يٰۤاَيُّهَا الَّذِيْنَ اٰمَنُوْا لَا تُقَدِّمُوْا بَيْنَ يَدَیِ اللّٰهِ وَ رَسُوْلِهٖ وَ اتَّقُوا اللّٰهَ ؕ اِنَّ اللّٰهَ سَمِيْعٌ عَلِيْمٌ' },
+      { type: 'text', text: '1] O People who Believe! Do not advance ahead of Allah and His Noble Messenger, and fear Allah; indeed Allah is All Hearing, All Knowing.' },
+      { type: 'arabic', text: 'يٰۤاَيُّهَا الَّذِيْنَ اٰمَنُوْا لَا تَرْفَعُوْۤا اَصْوَاتَكُمْ فَوْقَ صَوْتِ النَّبِیِّ وَ لَا تَجْهَرُوْا لَهٗ بِالْقَوْلِ كَجَهْرِ بَعْضِكُمْ لِبَعْضٍ اَنْ تَحْبَطَ اَعْمَالُكُمْ وَ اَنْتُمْ لَا تَشْعُرُوْنَ' },
+      { type: 'text', text: '2] O People who Believe! Do not raise your voices higher than the voice of the Prophet, nor speak to him loudly the way you shout to one another, lest your deeds go to waste whilst you are unaware. (Faith will go waste due to the slightest disrespect towards the Holy Prophet - peace and blessings be upon him. To honour him is part of faith. To disrespect him is blasphemy.)' },
+      { type: 'arabic', text: 'اِنَّ الَّذِيْنَ يَغُضُّوْنَ اَصْوَاتَهُمْ عِنْدَ رَسُوْلِ اللّٰهِ اُولٰٓئِكَ الَّذِيْنَ امْتَحَنَ اللّٰهُ قُلُوْبَهُمْ لِلتَّقْوٰی ؕ لَهُمْ مَّغْفِرَةٌ وَّ اَجْرٌ عَظِيْمٌ' },
+      { type: 'text', text: '3] Indeed those who suppress their voices in the presence of Allah’s Noble Messenger, are the ones whose hearts Allah has tested for piety; for them is forgiveness, and a great reward.' },
+      { type: 'arabic', text: 'اِنَّ الَّذِيْنَ يُنَادُوْنَكَ مِنْ وَّرَآءِ الْحُجُرٰتِ اَكْثَرُهُمْ لَا يَعْقِلُوْنَ' },
+      { type: 'text', text: '4] Indeed most of those who call you from outside the chambers do not have sense.' },
+      { type: 'arabic', text: 'وَ لَوْ اَنَّهُمْ صَبَرُوْا حَتّٰى تَخْرُجَ اِلَيْهِمْ لَكَانَ خَيْرًا لَّهُمْ ؕ وَ اللّٰهُ غَفُوْرٌ رَّحِيْمٌ' },
+      { type: 'text', text: '5] And had they been patient until you yourself came out to them, it would be better for them; and Allah is Oft Forgiving, Most Merciful.' },
+      { type: 'arabic', text: 'يٰۤاَيُّهَا الَّذِيْنَ اٰمَنُوْۤا اِنْ جَآءَكُمْ فَاسِقٌۢ بِنَبَاٍ فَتَبَيَّنُوْۤا اَنْ تُصِيْبُوْا قَوْمًاۢ بِجَهَالَةٍ فَتُصْبِحُوْا عَلٰی مَا فَعَلْتُمْ نٰدِمِيْنَ' },
+      { type: 'text', text: '6] O People who Believe! If any miscreant brings you some tidings, verify it, lest you unknowingly cause suffering to some people, and then remain repenting for what you did.' },
+      { type: 'arabic', text: 'وَ اعْلَمُوْۤا اَنَّ فِيْكُمْ رَسُوْلَ اللّٰهِ ؕ لَوْ يُطِيْعُكُمْ فِيْ كَثِيْرٍ مِّنَ الْاَمْرِ لَعَنِتُّمْ وَ لٰكِنَّ اللّٰهَ حَبَّبَ اِلَيْكُمُ الْاِيْمَانَ وَ زَيَّنَهٗ فِيْ قُلُوْبِكُمْ وَ كَرَّهَ اِلَيْكُمُ الْكُفْرَ وَ الْفُسُوْقَ وَ الْعِصْيَانَ ؕ اُولٰٓئِكَ هُمُ الرّٰشِدُوْنَۙ' },
+      { type: 'text', text: '7] And know that Allah’s Noble Messenger is among you; in most of the affairs, were he to listen to you, you would surely fall into hardship, but Allah has made faith dear to you and has instilled it in your hearts, and has made disbelief and rebellion and disobedience abhorred by you; it is people like these who are on guidance.' },
+      { type: 'arabic', text: 'فَضْلًا مِّنَ اللّٰهِ وَ نِعْمَةً ؕ وَ اللّٰهُ عَلِيْمٌ حَكِيْمٌ' },
+      { type: 'text', text: '8] The munificence and favour of Allah; and Allah is All Knowing, Wise.' },
+      { type: 'arabic', text: 'وَ اِنْ طَآئِفَتٰنِ مِنَ الْمُؤْمِنِيْنَ اقْتَتَلُوْا فَاَصْلِحُوْا بَيْنَهُمَا ۚ فَاِنْۢ بَغَتْ اِحْدٰىهُمَا عَلَى الْاُخْرٰى فَقَاتِلُوا الَّتِيْ تَبْغِيْ حَتّٰى تَفِيْٓءَ اِلٰۤى اَمْرِ اللّٰهِ ۚ فَاِنْ فَاءَتْ فَاَصْلِحُوْا بَيْنَهُمَا بِالْعَدْلِ وَ اَقْسِطُوْا ؕ اِنَّ اللّٰهَ يُحِبُّ الْمُقْسِطِيْنَ' },
+      { type: 'text', text: '9] And if two groups of Muslims fight against each other, reconcile them; and if one of them oppresses the other, fight against the oppressor till it returns to the command of Allah; then if it returns, reconcile between them with justice, and be fair; indeed Allah loves the equitable.' },
+      { type: 'arabic', text: 'اِنَّمَا الْمُؤْمِنُوْنَ اِخْوَةٌ فَاَصْلِحُوْا بَيْنَ اَخَوَيْكُمْ وَ اتَّقُوا اللّٰهَ لَعَلَّكُمْ تُرْحَمُوْنَ' },
+      { type: 'text', text: '10] The Muslims are brothers to each other, therefore make peace between your two brothers and fear Allah, so that you may gain mercy. (The entire Muslim nation is a single brotherhood, without any distinction for caste, creed or colour.)' },
+      { type: 'arabic', text: 'يٰۤاَيُّهَا الَّذِيْنَ اٰمَنُوْا لَا يَسْخَرْ قَوْمٌ مِّنْ قَوْمٍ عَسٰۤى اَنْ يَّكُوْنُوْا خَيْرًا مِّنْهُمْ وَ لَا نِسَآءٌ مِّنْ نِّسَآءٍ عَسٰۤى اَنْ يَّكُوْنَّ خَيْرًا مِّنْهُنَّ ۚ وَ لَا تَلْمِزُوْۤا اَنْفُسَكُمْ وَ لَا تَنَابَزُوْا بِالْاَلْقَابِ ؕ بِئْسَ الِاسْمُ الْفُسُوْقُ بَعْدَ الْاِيْمَانِ ۚ وَ مَنْ لَّمْ يَتُبْ فَاُولٰٓئِكَ هُمُ الظّٰلِمُوْنَ' },
+      { type: 'text', text: '11] O People who Believe! Men must not ridicule other men for it could be that the ridiculed are better than the mockers, nor must the women ridicule other women for the ridiculed women may be better than the mockers; and do not insult one another, nor assign evil nicknames; how base it is to be called a sinner after being a Muslim! And whoever does not repent - then it is they who are unjust.' },
+      { type: 'arabic', text: 'يٰۤاَيُّهَا الَّذِيْنَ اٰمَنُوا اجْتَنِبُوْا كَثِيْرًا مِّنَ الظَّنِّ ۫ اِنَّ بَعْضَ الظَّنِّ اِثْمٌ وَّ لَا تَجَسَّسُوْا وَ لَا يَغْتَبْ بَّعْضُكُمْ بَعْضًا ؕ اَيُحِبُّ اَحَدُكُمْ اَنْ يَّاكُلَ لَحْمَ اَخِيْهِ مَيْتًا فَكَرِهْتُمُوْهُ ؕ وَ اتَّقُوا اللّٰهَ ؕ اِنَّ اللّٰهَ تَوَّابٌ رَّحِيْمٌ' },
+      { type: 'text', text: '12] O People who Believe! Avoid excessive assumptions; indeed assumption sometimes becomes a sin, and do not seek faults, and do not slander one another; would any one among you like to eat the flesh of his dead brother? So you will hate that! And fear Allah; indeed Allah is Most Acceptor of Repentance, Most Merciful.' },
+      { type: 'arabic', text: 'يٰۤاَيُّهَا النَّاسُ اِنَّا خَلَقْنٰكُمْ مِّنْ ذَكَرٍ وَّ اُنْثٰی وَ جَعَلْنٰكُمْ شُعُوْبًا وَّ قَبَآئِلَ لِتَعَارَفُوْا ؕ اِنَّ اَكْرَمَكُمْ عِنْدَ اللّٰهِ اَتْقٰىكُمْ ؕ اِنَّ اللّٰهَ عَلِيْمٌ خَبِيْرٌ' },
+      { type: 'text', text: '13] O mankind! We have indeed created you from one man and one woman, and have made you into various nations and tribes so that you may know one another; indeed the more honourable among you, in the sight of Allah, is one who is more pious among you; indeed Allah is All Knowing, All Aware. (Piety is the basis of honour in Allah’s sight.)' },
+      { type: 'arabic', text: 'قَالَتِ الْاَعْرَابُ اٰمَنَّا ؕ قُلْ لَّمْ تُؤْمِنُوْا وَ لٰكِنْ قُوْلُوْۤا اَسْلَمْنَا وَ لَمَّا يَدْخُلِ الْاِيْمَانُ فِيْ قُلُوْبِكُمْ ؕ وَ اِنْ تُطِيْعُوا اللّٰهَ وَ رَسُوْلَهٗ لَا يَلِتْكُمْ مِّنْ اَعْمَالِكُمْ شَيْئًا ؕ اِنَّ اللّٰهَ غَفُوْرٌ رَّحِيْمٌ' },
+      { type: 'text', text: '14] The ignorant said, “We have accepted faith”; say, (O dear Prophet Mohammed - peace and blessings be upon him), “You have surely not accepted faith, but you should say ‘We have submitted’, for faith has not yet entered your hearts; and if you obey * Allah and His Noble Messenger, He will not reduce the reward of any of your deeds; indeed Allah is Oft Forgiving, Most Merciful.” (* By accepting faith and then obeying the commands).' },
+      { type: 'arabic', text: 'اِنَّمَا الْمُؤْمِنُوْنَ الَّذِيْنَ اٰمَنُوْا بِاللّٰهِ وَ رَسُوْلِهٖ ثُمَّ لَمْ يَرْتَابُوْا وَ جَاهَدُوْا بِاَمْوَالِهِمْ وَ اَنْفُسِهِمْ فِيْ سَبِيْلِ اللّٰهِ ؕ اُولٰٓئِكَ هُمُ الصّٰدِقُوْنَ' },
+      { type: 'text', text: '15] The true believers are only those who accepted faith in Allah and His Noble Messenger and then did not have any doubt, and fought with their wealth and their lives in Allah’s way; it is they who are the truthful.' },
+      { type: 'arabic', text: 'قُلْ اَتُعَلِّمُوْنَ اللّٰهَ بِدِيْنِكُمْ ؕ وَ اللّٰهُ يَعْلَمُ مَا فِي السَّمٰوٰتِ وَ مَا فِي الْاَرْضِ ؕ وَ اللّٰهُ بِكُلِّ شَيْءٍ عَلِيْمٌ' },
+      { type: 'text', text: '16] Proclaim (O dear Prophet Mohammed - peace and blessings be upon him), “Are you teaching Allah your own religion? Whereas Allah knows all whatever is in the heavens and all whatever is in the earth; and Allah knows all things.”' },
+      { type: 'arabic', text: 'يَمُنُّوْنَ عَلَيْكَ اَنْ اَسْلَمُوْا ؕ قُلْ لَّا تَمُنُّوْا عَلَيَّ اِسْلَامَكُمْ ۚ بَلِ اللّٰهُ يَمُنُّ عَلَيْكُمْ اَنْ هَدٰىكُمْ لِلْاِيْمَانِ اِنْ كُنْتُمْ صٰدِقِيْنَ' },
+      { type: 'text', text: '17] They portray that they are doing a great favour to you (O dear Prophet Mohammed - peace and blessings be upon him) by having become Muslims; say, “Do not think that you have done me a favour by accepting Islam; in fact Allah has bestowed a favour upon you, for He guided you to Islam, if you are truthful.”' },
+      { type: 'arabic', text: 'اِنَّ اللّٰهَ يَعْلَمُ غَيْبَ السَّمٰوٰتِ وَ الْاَرْضِ ؕ وَ اللّٰهُ بَصِيْرٌۢ بِمَا تَعْمَلُوْنَ' },
+      { type: 'text', text: '18] Indeed Allah knows all the hidden of the heavens and the earth; and Allah is seeing your deeds.' }
+            ]
+        },
+
+        {
+            id: 50, name: "QAF", ar: "ق", juz: 26,
+            audio: 'https://server10.mp3quran.net/minsh/050.mp3',
+            content: [
+                { type: 'section-title', text: 'QAF' },
+                { type: 'text', text: '(Revealed at Mecca - 45 verses)' },
+                { type: 'arabic', text: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ' },
+                 { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'قۤ ۚ وَ الْقُرْاٰنِ الْمَجِيْدِۚ' },
+      { type: 'text', text: '1] Qaf; by oath of the Glorious Qur’an.' },
+      { type: 'arabic', text: 'بَلْ عَجِبُوْۤا اَنْ جَآءَهُمْ مُّنْذِرٌ مِّنْهُمْ فَقَالَ الْكٰفِرُوْنَ هٰذَا شَيْءٌ عَجِيْبٌۚ' },
+      { type: 'text', text: '2] Rather they were shocked that a Herald of Warning came to them from among themselves, so the disbelievers said, “This is something really strange.”' },
+      { type: 'arabic', text: 'اَءِذَا مِتْنَا وَ كُنَّا تُرَابًا ۚ ذٰلِكَ رَجْعٌۢ بَعِيْدٌ' },
+      { type: 'text', text: '3] “When we are dead and have turned to dust, will we be raised again? That return is impossible!”' },
+      { type: 'arabic', text: 'قَدْ عَلِمْنَا مَا تَنْقُصُ الْاَرْضُ مِنْهُمْ ۚ وَ عِنْدَنَا كِتٰبٌ حَفِيْظٌ' },
+      { type: 'text', text: '4] We know all what the earth decreases from them; and with Us is a Book that retains.' },
+      { type: 'arabic', text: 'بَلْ كَذَّبُوْا بِالْحَقِّ لَمَّا جَآءَهُمْ فَهُمْ فِيْۤ اَمْرٍ مَّرِيْجٍ' },
+      { type: 'text', text: '5] In fact they denied the Truth when it came to them, so they are now in a dilemma.' },
+      { type: 'arabic', text: 'اَفَلَمْ يَنْظُرُوْۤا اِلَى السَّمَآءِ فَوْقَهُمْ كَيْفَ بَنَيْنٰهَا وَ زَيَّنّٰهَا وَ مَا لَهَا مِنْ فُرُوْجٍ' },
+      { type: 'text', text: '6] So did they not see the sky above them - how We have made it and beautified it, and there are no cracks in it?' },
+      { type: 'arabic', text: 'وَ الْاَرْضَ مَدَدْنٰهَا وَ اَلْقَيْنَا فِيْهَا رَوَاسِيَ وَ اَنْۢبَتْنَا فِيْهَا مِنْ كُلِّ زَوْجٍۢ بَهِيْجٍۙ' },
+      { type: 'text', text: '7] And (how) We have spread the earth, and placed mountains as anchors in it, and have grown all kinds of beautiful pairs in it?' },
+      { type: 'arabic', text: 'تَبْصِرَةً وَّ ذِكْرٰی لِكُلِّ عَبْدٍ مُّنِيْبٍ' },
+      { type: 'text', text: '8] A perception and an understanding, for every bondman who inclines.' },
+      { type: 'arabic', text: 'وَ نَزَّلْنَا مِنَ السَّمَآءِ مَآءً مُّبٰرَكًا فَاَنْۢبَتْنَا بِهٖ جَنّٰتٍ وَّ حَبَّ الْحَصِيْدِۙ' },
+      { type: 'text', text: '9] And We sent down the auspicious water from the sky, therefore producing gardens with it, and the grain that is harvested.' },
+      { type: 'arabic', text: 'وَ النَّخْلَ بَاسِقٰتٍ لَّهَا طَلْعٌ نَّضِيْدٌۙ' },
+      { type: 'text', text: '10] And high date-palms with lush fruit.' },
+      { type: 'arabic', text: 'رِّزْقًا لِّلْعِبَادِ ۙ وَ اَحْيَيْنَا بِهٖ بَلْدَةً مَّيْتًا ؕ كَذٰلِكَ الْخُرُوْجُ' },
+      { type: 'text', text: '11] As sustenance for the bondmen; and with it We revived a dead city; this is how you will be raised.' },
+      { type: 'arabic', text: 'كَذَّبَتْ قَبْلَهُمْ قَوْمُ نُوْحٍ وَّ اَصْحٰبُ الرَّسِّ وَ ثَمُوْدُۙ' },
+      { type: 'text', text: '12] Before these, the people of Nooh had denied, and so did the dwellers of Rass and the Thamud.' },
+      { type: 'arabic', text: 'وَ عَادٌ وَّ فِرْعَوْنُ وَ اِخْوَانُ لُوْطٍۙ' },
+      { type: 'text', text: '13] And the tribe of A’ad, and Firaun, and the fellowmen of Lut.' },
+      { type: 'arabic', text: 'وَّ اَصْحٰبُ الْاَيْكَةِ وَ قَوْمُ تُبَّعٍ ؕ كُلٌّ كَذَّبَ الرُّسُلَ فَحَقَّ وَعِيْدِ' },
+      { type: 'text', text: '14] And the Dwellers of the Woods, and the people of Tubb’a; each one of them one denied the Noble Messengers, so My promised punishment proved true.' },
+      { type: 'arabic', text: 'اَفَعَيِيْنَا بِالْخَلْقِ الْاَوَّلِ ؕ بَلْ هُمْ فِيْ لَبْسٍ مِّنْ خَلْقٍ جَدِيْدٍ' },
+      { type: 'text', text: '15] So did We tire by creating the first time? Rather they doubt in being created again.' },
+      { type: 'arabic', text: 'وَ لَقَدْ خَلَقْنَا الْاِنْسَانَ وَ نَعْلَمُ مَا تُوَسْوِسُ بِهٖ نَفْسُهٗ ۚۖ وَ نَحْنُ اَقْرَبُ اِلَيْهِ مِنْ حَبْلِ الْوَرِيْدِ' },
+      { type: 'text', text: '16] And indeed We have created man and We know what his soul instils in him; and We are nearer to him than the heart’s artery.' },
+      { type: 'arabic', text: 'اِذْ يَتَلَقَّى الْمُتَلَقِّيٰنِ عَنِ الْيَمِيْنِ وَ عَنِ الشِّمَالِ قَعِيْدٌ' },
+      { type: 'text', text: '17] When the two receiving angels receive from him, one seated on the right and one on the left.' },
+      { type: 'arabic', text: 'مَا يَلْفِظُ مِنْ قَوْلٍ اِلَّا لَدَيْهِ رَقِيْبٌ عَتِيْدٌ' },
+      { type: 'text', text: '18] He does not utter a single word, without a ready recorder seated next to him.' },
+      { type: 'arabic', text: 'وَ جَآءَتْ سَكْرَةُ الْمَوْتِ بِالْحَقِّ ؕ ذٰلِكَ مَا كُنْتَ مِنْهُ تَحِيْدُ' },
+      { type: 'text', text: '19] And the hardship of death came with the truth; “This is what you were escaping from!”' },
+      { type: 'arabic', text: 'وَ نُفِخَ فِي الصُّوْرِ ؕ ذٰلِكَ يَوْمُ الْوَعِيْدِ' },
+      { type: 'text', text: '20] And the Trumpet was blown; “This is the Day of the promised punishment.”' },
+      { type: 'arabic', text: 'وَ جَآءَتْ كُلُّ نَفْسٍ مَّعَهَا سَآئِقٌ وَّ شَهِيْدٌ' },
+      { type: 'text', text: '21] And every soul came, along with a herder and a witness.' },
+      { type: 'arabic', text: 'لَقَدْ كُنْتَ فِيْ غَفْلَةٍ مِّنْ هٰذَا فَكَشَفْنَا عَنْكَ غِطَآءَكَ فَبَصَرُكَ الْيَوْمَ حَدِيْدٌ' },
+      { type: 'text', text: '22] “You were indeed neglectful of this, so We have removed the veil for you, and your eyesight is sharp this day.”' },
+      { type: 'arabic', text: 'وَ قَالَ قَرِيْنُهٗ هٰذَا مَا لَدَيَّ عَتِيْدٌؕ' },
+      { type: 'text', text: '23] And his accompanying angel said, “This is the record of your deeds, available with me.”' },
+      { type: 'arabic', text: 'اَلْقِيَا فِيْ جَهَنَّمَ كُلَّ كَفَّارٍ عَنِيْدٍۙ' },
+      { type: 'text', text: '24] It will be said to the angels, “Both of you fling every excessive ungrateful, stubborn person into hell.”' },
+      { type: 'arabic', text: 'مَّنَّاعٍ لِّلْخَيْرِ مُعْتَدٍ مُّرِيْبٍۙ' },
+      { type: 'text', text: '25] “The one who excessively prevented from virtue, the transgressor, the doubtful.”' },
+      { type: 'arabic', text: 'الَّذِيْ جَعَلَ مَعَ اللّٰهِ اِلٰهًا اٰخَرَ فَاَلْقِيٰهُ فِي الْعَذَابِ الشَّدِيْدِ' },
+      { type: 'text', text: '26] “The one who appointed another God along with Allah – so both of you fling him into the severe punishment.”' },
+      { type: 'arabic', text: 'قَالَ قَرِيْنُهٗ رَبَّنَا مَاۤ اَطْغَيْتُهٗ وَ لٰكِنْ كَانَ فِيْ ضَلٰلٍۢ بَعِيْدٍ' },
+      { type: 'text', text: '27] His accompanying devil said, “Our Lord! I did not cause him to rebel, but he himself was in extreme error.”' },
+      { type: 'arabic', text: 'قَالَ لَا تَخْتَصِمُوْا لَدَيَّ وَ قَدْ قَدَّمْتُ اِلَيْكُمْ بِالْوَعِيْدِ' },
+      { type: 'text', text: '28] He will say, “Do not dispute before Me – I had already warned you of the punishment.”' },
+      { type: 'arabic', text: 'مَا يُبَدَّلُ الْقَوْلُ لَدَيَّ وَ مَاۤ اَنَا بِظَلَّامٍ لِّلْعَبِيْدِ' },
+      { type: 'text', text: '29] “With Me, the decree does not change, and nor do I oppress the bondmen.”' },
+      { type: 'arabic', text: 'يَوْمَ نَقُوْلُ لِجَهَنَّمَ هَلِ امْتَلَاْتِ وَ تَقُوْلُ هَلْ مِنْ مَّزِيْدٍ' },
+      { type: 'text', text: '30] The day when We will ask hell, “Are you filled up?” and it will answer, “Are there some more?”' },
+      { type: 'arabic', text: 'وَ اُزْلِفَتِ الْجَنَّةُ لِلْمُتَّقِيْنَ غَيْرَ بَعِيْدٍ' },
+      { type: 'text', text: '31] And Paradise will be brought close to the pious, not far away from them.' },
+      { type: 'arabic', text: 'هٰذَا مَا تُوْعَدُوْنَ لِكُلِّ اَوَّابٍ حَفِيْظٍۚ' },
+      { type: 'text', text: '32] This is what you are promised – for every repenting, careful person.' },
+      { type: 'arabic', text: 'مَنْ خَشِيَ الرَّحْمٰنَ بِالْغَيْبِ وَ جَآءَ بِقَلْبٍ مُّنِيْبِۙ' },
+      { type: 'text', text: '33] Who fears the Most Gracious without seeing, and came with a heart that inclines.' },
+      { type: 'arabic', text: 'ادْخُلُوْهَا بِسَلٰمٍ ؕ ذٰلِكَ يَوْمُ الْخُلُوْدِ' },
+      { type: 'text', text: '34] It will be said to him, “Enter it in peace; this is the day of eternity.”' },
+      { type: 'arabic', text: 'لَهُمْ مَّا يَشَآءُوْنَ فِيْهَا وَ لَدَيْنَا مَزِيْدٌ' },
+      { type: 'text', text: '35] In it for them is all that they may desire, and with Us is more than it.' },
+      { type: 'arabic', text: 'وَ كَمْ اَهْلَكْنَا قَبْلَهُمْ مِّنْ قَرْنٍ هُمْ اَشَدُّ مِنْهُمْ بَطْشًا فَنَقَّبُوْا فِي الْبِلَادِ ؕ هَلْ مِنْ مَّحِيْصٍ' },
+      { type: 'text', text: '36] And many a generation We did destroy before them, who exceeded them in strength, therefore venturing in the cities! Is there a place to escape?' },
+      { type: 'arabic', text: 'اِنَّ فِيْ ذٰلِكَ لَذِكْرٰی لِمَنْ كَانَ لَهٗ قَلْبٌ اَوْ اَلْقَی السَّمْعَ وَ هُوَ شَهِيْدٌ' },
+      { type: 'text', text: '37] Indeed in this is an advice for anyone who keeps a heart, or listens attentively.' },
+      { type: 'arabic', text: 'وَ لَقَدْ خَلَقْنَا السَّمٰوٰتِ وَ الْاَرْضَ وَ مَا بَيْنَهُمَا فِيْ سِتَّةِ اَيَّامٍ ۚۖ وَّ مَا مَسَّنَا مِنْ لُّغُوْبٍ' },
+      { type: 'text', text: '38] And We have indeed created the heavens and the earth, and all what is between them, in six days; and fatigue did not even approach Us.' },
+      { type: 'arabic', text: 'فَاصْبِرْ عَلٰی مَا يَقُوْلُوْنَ وَ سَبِّحْ بِحَمْدِ رَبِّكَ قَبْلَ طُلُوْعِ الشَّمْسِ وَ قَبْلَ الْغُرُوْبِۚ' },
+      { type: 'text', text: '39] Therefore (O dear prophet Mohammed – peace and blessings be upon him) patiently bear upon what they say, and praising your Lord say His Purity before the sun rises and before the sun sets.' },
+      { type: 'arabic', text: 'وَ مِنَ الَّيْلِ فَسَبِّحْهُ وَ اَدْبَارَ السُّجُوْدِ' },
+      { type: 'text', text: '40] And say His Purity during the night, and after the customary prayers.' },
+      { type: 'arabic', text: 'وَ اسْتَمِعْ يَوْمَ يُنَادِ الْمُنَادِ مِنْ مَّكَانٍ قَرِيْبٍۙ' },
+      { type: 'text', text: '41] And listen attentively on the day when an announcer will proclaim from a place nearby.' },
+      { type: 'arabic', text: 'يَوْمَ يَسْمَعُوْنَ الصَّيْحَةَ بِالْحَقِّ ؕ ذٰلِكَ يَوْمُ الْخُرُوْجِ' },
+      { type: 'text', text: '42] The day when all will hear the Scream with the truth; this is the day of coming out of the graves.' },
+      { type: 'arabic', text: 'اِنَّا نَحْنُ نُحْيٖ وَ نُمِيْتُ وَ اِلَيْنَا الْمَصِيْرُۙ' },
+      { type: 'text', text: '43] Indeed it is We Who give life, and give death, and towards Us only is the return.' },
+      { type: 'arabic', text: 'يَوْمَ تَشَقَّقُ الْاَرْضُ عَنْهُمْ سِرَاعًا ؕ ذٰلِكَ حَشْرٌ عَلَيْنَا يَسِيْرٌ' },
+      { type: 'text', text: '44] On the day when the earth will split for them, so they will come out in haste; this is the gathering - easy for Us.' },
+      { type: 'arabic', text: 'نَحْنُ اَعْلَمُ بِمَا يَقُوْلُوْنَ وَ مَاۤ اَنْتَ عَلَيْهِمْ بَجَبَّارٍ ۪ فَذَكِّرْ بِالْقُرْاٰنِ مَنْ يَّخَافُ وَعِيْدِ' },
+   { type: 'text', text: '45] We well know what they say (O dear Prophet Mohammed – peace and blessings be upon him), and you are not one to use force over them; therefore advise him with the Qur’an, whoever fears My threat.' }
+            ]
+        },
+
+        {
+            id: 51, name: "AD DHARIYAT", ar: "الذاريات", juz: 26,
+            audio: 'https://server10.mp3quran.net/minsh/051.mp3',
+            content: [
+                { type: 'section-title', text: 'AD DHARIYAT (THE SCATTERING WINDS)' },
+                { type: 'text', text: '(Revealed at Mecca - 60 verses)' },
+                { type: 'arabic', text: 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ' },
+                { type: 'text', text: 'Allah - beginning with the name of - the Most Gracious, the Most Merciful' },
+      { type: 'arabic', text: 'وَ الذّٰرِيٰتِ ذَرْوًاۙ' },
+      { type: 'text', text: '1] By oath of those that blow with a dispersion.' },
+      { type: 'arabic', text: 'فَالْحٰمِلٰتِ وِقْرًاۙ' },
+      { type: 'text', text: '2] Then those that carry a heavy burden.' },
+      { type: 'arabic', text: 'فَالْجٰرِيٰتِ يُسْرًاۙ' },
+      { type: 'text', text: '3] Then those that glide with ease.' },
+      { type: 'arabic', text: 'فَالْمُقَسِّمٰتِ اَمْرًاۙ' },
+      { type: 'text', text: '4] Then those that distribute the command.' },
+      { type: 'arabic', text: 'اِنَّمَا تُوْعَدُوْنَ لَصَادِقٌۙ' },
+      { type: 'text', text: '5] Indeed what you are promised is true.' },
+      { type: 'arabic', text: 'وَّ اِنَّ الدِّيْنَ لَوَاقِعٌؕ' },
+      { type: 'text', text: '6] And indeed the judgment will surely happen.' },
+      { type: 'arabic', text: 'وَ السَّمَآءِ ذَاتِ الْحُبُكِۙ' },
+      { type: 'text', text: '7] By oath of the sky, the owner of paths.' },
+      { type: 'arabic', text: 'اِنَّكُمْ لَفِيْ قَوْلٍ مُّخْتَلِفٍۙ' },
+      { type: 'text', text: '8] Indeed you are in a discordant opinion.' },
+      { type: 'arabic', text: 'يُّؤْفَكُ عَنْهُ مَنْ اُفِكَؕ' },
+      { type: 'text', text: '9] Diverted from it is he who is diverted.' },
+      { type: 'arabic', text: 'قُتِلَ الْخَرّٰصُوْنَۙ' },
+      { type: 'text', text: '10] Accursed be the liars.' },
+      { type: 'arabic', text: 'الَّذِيْنَ هُمْ فِيْ غَمْرَةٍ سَاهُوْنَۚ' },
+      { type: 'text', text: '11] Those who are in a confused state, neglectful.' },
+      { type: 'arabic', text: 'يَسْـَٔلُوْنَ اَيَّانَ يَوْمُ الدِّيْنِؕ' },
+      { type: 'text', text: '12] They ask, “When will the Day of Judgment be?”' },
+      { type: 'arabic', text: 'يَوْمَ هُمْ عَلَى النَّارِ يُفْتَنُوْنَ' },
+      { type: 'text', text: '13] (It is) the day when they will be punished upon the fire.' },
+      { type: 'arabic', text: 'ذُوْقُوْا فِتْنَتَكُمْ ؕ هٰذَا الَّذِيْ كُنْتُمْ بِهٖ تَسْتَعْجِلُوْنَ' },
+      { type: 'text', text: '14] “Taste your punishment! This is what you were being impatient for.”' },
+      { type: 'arabic', text: 'اِنَّ الْمُتَّقِيْنَ فِيْ جَنّٰتٍ وَّ عُيُوْنٍۙ' },
+      { type: 'text', text: '15] Indeed the pious are in Gardens and water-springs.' },
+      { type: 'arabic', text: 'اٰخِذِيْنَ مَاۤ اٰتٰىهُمْ رَبُّهُمْ ؕ اِنَّهُمْ كَانُوْا قَبْلَ ذٰلِكَ مُحْسِنِيْنَؕ' },
+      { type: 'text', text: '16] Receiving what their Lord has given them; indeed they were virtuous before this.' },
+      { type: 'arabic', text: 'كَانُوْا قَلِيْلًا مِّنَ الَّيْلِ مَا يَهْجَعُوْنَ' },
+      { type: 'text', text: '17] They used to sleep but little during the night.' },
+      { type: 'arabic', text: 'وَ بِالْاَسْحَارِ هُمْ يَسْتَغْفِرُوْنَ' },
+      { type: 'text', text: '18] And in the latter parts of the night they used to seek forgiveness.' },
+      { type: 'arabic', text: 'وَ فِيْۤ اَمْوَالِهِمْ حَقٌّ لِّلسَّآئِلِ وَ الْمَحْرُوْمِ' },
+      { type: 'text', text: '19] And in their wealth was a share for the beggar and the prevented.' },
+      { type: 'arabic', text: 'وَ فِي الْاَرْضِ اٰيٰتٌ لِّلْمُوْقِنِيْنَۙ' },
+      { type: 'text', text: '20] And in the earth are signs for those who are certain.' },
+      { type: 'arabic', text: 'وَ فِيْۤ اَنْفُسِكُمْ ؕ اَفَلَا تُبْصِرُوْنَ' },
+      { type: 'text', text: '21] And within yourselves; so do you not see?' },
+      { type: 'arabic', text: 'وَ فِي السَّمَآءِ رِزْقُكُمْ وَ مَا تُوْعَدُوْنَ' },
+      { type: 'text', text: '22] And in the sky is your sustenance and what you are promised.' },
+      { type: 'arabic', text: 'فَوَرَبِّ السَّمَآءِ وَ الْاَرْضِ اِنَّهٗ لَحَقٌّ مِّثْلَ مَاۤ اَنَّكُمْ تَنْطِقُوْنَ' },
+      { type: 'text', text: '23] So by the oath of the Lord of the heavens and the earth, this (Last Day) is a reality, just as you speak!' },
+      { type: 'arabic', text: 'هَلْ اَتٰىكَ حَدِيْثُ ضَيْفِ اِبْرٰهِيْمَ الْمُكْرَمِيْنَۘ' },
+      { type: 'text', text: '24] Has the news of the honoured guests of Ibrahim come to you?' },
+      { type: 'arabic', text: 'اِذْ دَخَلُوْا عَلَيْهِ فَقَالُوْا سَلٰمًا ؕ قَالَ سَلٰمٌ ۚ قَوْمٌ مُّنْكَرُوْنَۚ' },
+      { type: 'text', text: '25] When they came to him and said, “Peace!”; he said, “Peace! (You are) a group of strangers.”' },
+      { type: 'arabic', text: 'فَرَاغَ اِلٰۤى اَهْلِهٖ فَجَآءَ بِعِجْلٍ سَمِيْنٍۙ' },
+      { type: 'text', text: '26] Then he went to his family and brought a fat calf.' },
+      { type: 'arabic', text: 'فَقَرَّبَهٗۤ اِلَيْهِمْ قَال اَلَا تَاْكُلُوْنَ' },
+      { type: 'text', text: '27] So he placed it before them; he said, “Do you not eat?”' },
+      { type: 'arabic', text: 'فَاَوْجَسَ مِنْهُمْ خِيْفَةً ؕ قَالُوْا لَا تَخَافُ ؕ وَ بَشَّرُوْهُ بِغُلٰمٍ عَلِيْمٍ' },
+      { type: 'text', text: '28] So he became slightly afraid of them in his heart; they said, “Do not fear!”; and they gave him the glad tidings of a son possessing knowledge.' },
+      { type: 'arabic', text: 'فَاَقْبَلَتِ امْرَاَتُهٗ فِيْ صَرَّةٍ فَصَكَّتْ وَجْهَهَا وَ قَالَتْ عَجُوْزٌ عَقِيْمٌ' },
+      { type: 'text', text: '29] His wife came out shouting, and struck her forehead and said, “What! A barren old woman?”' },
+      { type: 'arabic', text: 'قَالُوْا كَذٰلِكِ ۙ قَالَ رَبُّكِ ؕ اِنَّهٗ هُوَ الْحَكِيْمُ الْعَلِيْمُ' },
+      { type: 'text', text: '30] They said, “Thus has your Lord said; indeed He is the Wise, the All Knowing.”' },
+      { type: 'arabic', text: 'قَالَ فَمَا خَطْبُكُمْ اَيُّهَا الْمُرْسَلُوْنَ' },
+      { type: 'text', text: '31] Said Ibrahim, “What is your important mission, O messengers?”' },
+      { type: 'arabic', text: 'قَالُوْۤا اِنَّاۤ اُرْسِلْنَاۤ اِلٰی قَوْمٍ مُّجْرِمِيْنَۙ' },
+      { type: 'text', text: '32] They said, “We have been sent towards a guilty nation.”' },
+      { type: 'arabic', text: 'لِنُرْسِلَ عَلَيْهِمْ حِجَارَةً مِّنْ طِيْنٍۙ' },
+      { type: 'text', text: '33] “So that we may release upon them stones of baked clay.”' },
+      { type: 'arabic', text: 'مُّسَوَّمَةً عِنْدَ رَبِّكَ لِلْمُسْرِفِيْنَ' },
+      { type: 'text', text: '34] “Which are marked from your Lord, for the transgressors.”' },
+      { type: 'arabic', text: 'فَاَخْرَجْنَا مَنْ كَانَ فِيْهَا مِنَ الْمُؤْمِنِيْنَۚ' },
+      { type: 'text', text: '35] So We removed all the believers who were there.' },
+      { type: 'arabic', text: 'فَمَا وَجَدْنَا فِيْهَا غَيْرَ بَيْتٍ مِّنَ الْمُسْلِمِيْنَۚ' },
+      { type: 'text', text: '36] And We did not find in it except one house of Muslims.' },
+      { type: 'arabic', text: 'وَ تَرَكْنَا فِيْهَاۤ اٰيَةً لِّلَّذِيْنَ يَخَافُوْنَ الْعَذَابَ الْاَلِيْمَؕ' },
+      { type: 'text', text: '37] And We left a sign in it for those who fear the painful punishment.' },
+      { type: 'arabic', text: 'وَ فِيْ مُوْسٰۤى اِذْ اَرْسَلْنٰهُ اِلٰی فِرْعَوْنَ بِسُلْطٰنٍ مُّبِيْنٍ' },
+      { type: 'text', text: '38] And in Moosa, when We sent him towards Firaun with a clear proof.' },
+      { type: 'arabic', text: 'فَتَوَلّٰى بِرُكْنِهٖ وَ قَالَ سٰحِرٌ اَوْ مَجْنُوْنٌ' },
+      { type: 'text', text: '39] So he turned away with his power and said, “A magician or a madman!”' },
+      { type: 'arabic', text: 'فَاَخَذْنٰهُ وَ جُنُوْدَهٗ فَنَبَذْنٰهُمْ فِي الْيَمِّ وَ هُوَ مُلِيْمٌؕ' },
+      { type: 'text', text: '40] So We seized him and his armies and flung them into the sea, and he was the one to be blamed.' },
+      { type: 'arabic', text: 'وَ فِيْ عَادٍ اِذْ اَرْسَلْنَا عَلَيْهِمُ الرِّيْحَ الْعَقِيْمَۚ' },
+      { type: 'text', text: '41] And in the A’ad, when We sent upon them the windstorm that ruins.' },
+      { type: 'arabic', text: 'مَا تَذَرُ مِنْ شَيْءٍ اَتَتْ عَلَيْهِ اِلَّا جَعَلَتْهُ كَالرَّمِيْمِؕ' },
+      { type: 'text', text: '42] It did not leave anything it came upon without turning it to dust.' },
+      { type: 'arabic', text: 'وَ فِيْ ثَمُوْدَ اِذْ قِيْلَ لَهُمْ تَمَتَّعُوْا حَتّٰى حِيْنٍ' },
+      { type: 'text', text: '43] And in the Thamud, when it was said to them, “Enjoy for a while.”' },
+      { type: 'arabic', text: 'فَعَتَوْا عَنْ اَمْرِ رَبِّهِمْ فَاَخَذَتْهُمُ الصّٰعِقَةُ وَ هُمْ يَنْظُرُوْنَ' },
+      { type: 'text', text: '44] Then they rebelled against the command of their Lord, so the thunderbolt seized them while they were looking.' },
+      { type: 'arabic', text: 'فَمَا اسْتَطَاعُوْا مِنْ قِيَامٍ وَّ مَا كَانُوْا مُنْتَصِرِيْنَۙ' },
+      { type: 'text', text: '45] So they could neither stand up nor could they save themselves.' },
+      { type: 'arabic', text: 'وَ قَوْمَ نُوْحٍ مِّنْ قَبْلُ ؕ اِنَّهُمْ كَانُوْا قَوْمًا فٰسِقِيْنَ' },
+      { type: 'text', text: '46] And We destroyed the people of Nooh before this; they were indeed a disobedient nation.' },
+      { type: 'arabic', text: 'وَ السَّمَآءَ بَنَيْنٰهَا بِاَيْىْدٍ وَّ اِنَّا لَمُوْسِعُوْنَ' },
+      { type: 'text', text: '47] And We have built the sky with power, and We are indeed the Makers of the vastness.' },
+      { type: 'arabic', text: 'وَ الْاَرْضَ فَرَشْنٰهَا فَنِعْمَ الْمَاهِدُوْنَ' },
+      { type: 'text', text: '48] And We have spread the earth, so what excellent Spreaders We are!' },
+      { type: 'arabic', text: 'وَ مِنْ كُلِّ شَيْءٍ خَلَقْنَا زَوْجَيْنِ لَعَلَّكُمْ تَذَكَّرُوْنَ' },
+      { type: 'text', text: '49] And We have created all things in pairs, so that you may understand.' },
+      { type: 'arabic', text: 'فَفِرُّوْۤا اِلَى اللّٰهِ ؕ اِنِّيْ لَكُمْ مِّنْهُ نَذِيْرٌ مُّبِيْنٌۚ' },
+      { type: 'text', text: '50] “Therefore rush towards Allah; I am indeed a Herald of clear warning from Him to you.”' },
+      { type: 'arabic', text: 'وَ لَا تَجْعَلُوْا مَعَ اللّٰهِ اِلٰهًا اٰخَرَ ؕ اِنِّيْ لَكُمْ مِّنْهُ نَذِيْرٌ مُّبِيْنٌۚ' },
+      { type: 'text', text: '51] “And do not appoint another God along with Allah; I am indeed a Herald of clear warning from Him to you.”' },
+      { type: 'arabic', text: 'كَذٰلِكَ مَاۤ اَتَى الَّذِيْنَ مِنْ قَبْلِهِمْ مِّنْ رَّسُوْلٍ اِلَّا قَالُوْا سَاحِرٌ اَوْ مَجْنُوْنٌ' },
+      { type: 'text', text: '52] Similarly, whenever a Noble Messenger came to those before them, they only said, “A magician or a madman!”' },
+      { type: 'arabic', text: 'اَتَوَاصَوْا بِهٖ ۚ بَلْ هُمْ قَوْمٌ طَاغُوْنَۚ' },
+      { type: 'text', text: '53] Have they passed this word to each other? In fact they are a rebellious nation.' },
+      { type: 'arabic', text: 'فَتَوَلَّ عَنْهُمْ فَمَاۤ اَنْتَ بِمَلُوْمٍ' },
+      { type: 'text', text: '54] So turn away from them (O dear Prophet Mohammed – peace and blessings be upon him); you are not the one to be blamed.' },
+      { type: 'arabic', text: 'وَ ذَكِّرْ فَاِنَّ الذِّكْرٰی تَنْفَعُ الْمُؤْمِنِيْنَ' },
+      { type: 'text', text: '55] And advise, for advice benefits the believers.' },
+      { type: 'arabic', text: 'وَ مَا خَلَقْتُ الْجِنَّ وَ الْاِنْسَ اِلَّا لِيَعْبُدُوْنِ' },
+      { type: 'text', text: '56] And I have created jinns and men, only for them to worship Me.' },
+      { type: 'arabic', text: 'مَاۤ اُرِيْدُ مِنْهُمْ مِّنْ رِّزْقٍ وَّ مَاۤ اُرِيْدُ اَنْ يُّطْعِمُوْنِ' },
+      { type: 'text', text: '57] I do not ask any sustenance from them, nor do I ask them to feed Me.' },
+      { type: 'arabic', text: 'اِنَّ اللّٰهَ هُوَ الرَّزَّاقُ ذُو الْقُوَّةِ الْمَتِيْنُ' },
+      { type: 'text', text: '58] Indeed Allah only is the Greatest Sustainer, the Powerful, the Strong.' },
+      { type: 'arabic', text: 'فَاِنَّ لِلَّذِيْنَ ظَلَمُوْا ذَنُوْبًا مِّثْلَ ذَنُوْبِ اَصْحٰبِهِمْ فَلَا يَسْتَعْجِلُوْنِ' },
+      { type: 'text', text: '59] So for the unjust is a share (of punishment) like the share of their companions, so they should not be impatient.' },
+      { type: 'arabic', text: 'فَوَيْلٌ لِّلَّذِيْنَ كَفَرُوْا مِنْ يَّوْمِهِمُ الَّذِيْ يُوْعَدُوْنَ' },
+      { type: 'text', text: '60] So ruin is for the disbelievers on account of the day which they are promised.' }
+
+            ]
+        }
+    ]; // <-- FIX 3: Moved ]; here to close the Surah array properly
+
+    // <-- FIX 4: Removed the random { that was breaking your variables
+   let activeID = 42;
+    let fontSize = 38;
+    let currentMode = 'vbv';
+
+    function init() {
+        const target = document.getElementById('sidebar-target');
+        surahs.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'surah-item';
+            div.innerHTML = `<b>${s.id}</b> <span style="flex:1; margin-left:15px">${s.name}</span> <span style="font-family:'Scheherazade New', serif; font-size: 20px;">${s.ar}</span>`;
+            div.onclick = () => { activeID = s.id; loadSurah(s.id); document.body.classList.add('sidebar-hidden'); };
+            target.appendChild(div);
+        });
+        loadSurah(42);
+    }
+
+    function loadSurah(id) {
+        const s = surahs.find(x => x.id === id);
+        document.getElementById('qAudio').src = s.audio;
+        document.getElementById('pill-name').innerText = s.name;
+        renderQuran();
+    }
+
+    function renderQuran() {
+        const s = surahs.find(x => x.id === activeID);
+        const target = document.getElementById('quran-render');
+        const showTr = document.getElementById('trCheck').checked;
+        
+        let html = '';
+        let ayahCounter = 0;
+        let surahMeta = '';
+        
+        s.content.forEach(item => { if(item.text && item.text.includes('Revealed')) surahMeta = item.text; });
+
+        html += `<div class="header-section">
+                    <div class="surah-ar-title">سورة ${s.ar}</div>
+                    <div class="surah-en-title">${s.name}</div>
+                    <div class="surah-meta">${surahMeta}</div>
+                 </div>`;
+        
+        if (currentMode === 'vbv') {
+            s.content.forEach((item, index) => {
+                if (item.type === 'arabic') {
+                    const arText = item.text;
+                    let trText = (s.content[index + 1] && s.content[index + 1].type === 'text') ? s.content[index + 1].text : '';
+                    trText = trText.replace(/^\d+\]\s*/, ''); 
+
+                    html += `<div class="verse-block" id="ayah-${ayahCounter}">
+                        <div class="ar-line">
+                            <span class="ayah-num">${ayahCounter}</span>
+                            <span class="ar-text" style="font-size:${fontSize}px">${arText}</span>
+                        </div>
+                        ${showTr ? `<span class="en-text">${trText}</span>` : ''}
+                    </div>`;
+                    ayahCounter++;
+                }
+            });
+        } else {
+            html += `<div class="inline-container">`;
+            s.content.forEach((item, index) => {
+                if (item.type === 'arabic') {
+                    let trText = (s.content[index + 1] && s.content[index + 1].type === 'text') ? s.content[index + 1].text : '';
+                    trText = trText.replace(/^\d+\]\s*/, ''); 
+                    html += `<div class="inline-word-wrap" id="ayah-${ayahCounter}">
+                        <span class="inline-ar" style="font-size:${fontSize}px">${item.text} <span class="ayah-num">${ayahCounter}</span></span>
+                        ${showTr ? `<span class="inline-tr">${trText}</span>` : ''}
+                    </div>`;
+                    ayahCounter++;
+                }
+            });
+            html += `</div>`;
+        }
+        target.innerHTML = html;
+    }
+
+    function setMode(m) {
+        currentMode = m;
+        document.getElementById('mode-vbv').classList.toggle('active', m === 'vbv');
+        document.getElementById('mode-inline').classList.toggle('active', m === 'inline');
+        renderQuran();
+    }
+
+    function toggleBookmark() { document.getElementById('bmrk').classList.toggle('active'); }
+    function jumpTo() {
+        const val = document.getElementById('jumpInp').value;
+        const el = document.getElementById(`ayah-${val}`);
+        if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    /* --- COLOR FIX APPLIED HERE --- */
+    function setTheme(c) { 
+        document.documentElement.style.setProperty('--bg-theme', c);
+        document.getElementById('sidebar').style.backgroundColor = c; 
+    }
+    
+    function changeSize(n) { fontSize += n; document.getElementById('szVal').innerText = fontSize+'pt'; renderQuran(); }
+    function toggleMenu() { document.body.classList.toggle('sidebar-hidden'); }
+    function openSettings() { document.getElementById('setModal').style.display = 'flex'; }
+    function closeSettings() { document.getElementById('setModal').style.display = 'none'; }
+    function toggleAudio() { const a = document.getElementById('qAudio'); a.paused ? a.play() : a.pause(); document.getElementById('playBtn').innerText = a.paused ? "▶" : "⏸"; }
+
+    init();
+</script>
+</body>
+</html>
