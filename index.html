@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. HARD RESET: KILLS ALL EXTRA GAPS --- */
+        /* --- 1. THE HARD RESET (KILLS ALL GAPS) --- */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         :root { --bg-theme: #F4EFE7; --accent: #E67E22; }
@@ -35,6 +35,7 @@
         .surah-item { 
             background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px; 
             display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            width: 100%;
         }
         .surah-num-circle { 
             background: rgba(230,126,34,0.1); color: var(--accent); 
@@ -72,7 +73,7 @@
         
         /* --- 6. STOP ZOOM JOKE --- */
         .jump-input { 
-            width: 50px; border: 1px solid #DDD; border-radius: 8px; 
+            width: 55px; border: 1px solid #DDD; border-radius: 8px; 
             padding: 8px; text-align: center; 
             font-size: 16px !important; /* MUST BE 16PX TO NOT ZOOM */
             background: #f9f9f9;
@@ -130,6 +131,7 @@
 <audio id="qAudio"></audio>
 
 <script>
+    // --- !!! PASTE YOUR BIG LIST OF SURAHS BELOW !!! ---
     const surahs = [
         {
             id: 42, name: "AL SHOORA", ar: "الشورى", juz: 25,
@@ -1236,7 +1238,7 @@
     ]; // <-- FIX 3: Moved ]; here to close the Surah array properly
 
     // <-- FIX 4: Removed the random { that was breaking your variables
-     let activeID = 42;
+    let activeID = 42;
     let fontSize = 28;
     let currentMode = 'vbv';
 
@@ -1328,11 +1330,6 @@
         if(a.paused) { a.play(); document.getElementById('playBtn').innerText = "⏸"; }
         else { a.pause(); document.getElementById('playBtn').innerText = "▶"; }
     }
-    function toggleBookmark() {
-        const b = document.getElementById('bmrk');
-        b.style.color = (b.style.color === 'orange') ? '#444' : 'orange';
-    }
-
     init();
 </script>
 </body>
