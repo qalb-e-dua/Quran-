@@ -13418,7 +13418,7 @@ content: [ { type: 'section-title', text: 'AL WAQIA`H (THE EVENT)' },
 };
 
 // ==========================================
-// 2. APP LOGIC SECTION
+// 2. APP LOGIC SECTION (COMPLETE)
 // ==========================================
 
 const { useState, useEffect, useRef, Fragment } = React;
@@ -13426,10 +13426,9 @@ const { useState, useEffect, useRef, Fragment } = React;
 const IconSettings = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l-.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l-.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l-.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>;
 const IconBack = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 18-6-6 6-6"/></svg>;
 const IconHome = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>;
-const IconBookmark = () => <svg width="45" height="45" viewBox="0 0 24 24" fill="#C5A059" stroke="#C5A059" strokeWidth="1.5"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>;
-const IconMenuBookmark = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C5A059" strokeWidth="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>;
 const IconDelete = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
 const IconCalendar = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+const IconMenuBookmark = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C5A059" strokeWidth="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>;
 
 const THEMES = {
   standard: { id: 'standard', bg: '#051F22', text: '#E2D1A7', card: '#06282d', accent: '#C5A059', name: 'Standard' },
@@ -13449,56 +13448,40 @@ const toEnglishDigits = (str) => { if(!str) return ''; return str.replace(/[٠-�
 
 const formatArabicWithEnglishNumbers = (text, extractedNumber) => {
       if (!text) return text;
-      const hasDigits = /[٠-٩۰-۹0-9]/.test(text);
-      
-      if (hasDigits) {
-          const regex = /([۝﴿﴾]?\s*[٠-٩۰-۹0-9]+\s*[۝﴿﴾]?)/g;
-          const parts = text.split(regex);
-          return parts.map((part, i) => {
-              if (part.match(/[٠-٩۰-۹0-9]/)) {
-                  const englishNum = toEnglishDigits(part.replace(/[^٠-٩۰-۹0-9]/g, ''));
-                  return <span key={i} className="quran-verse-circle">{englishNum}</span>;
-              }
-              return part;
-          });
-      } else if (extractedNumber) {
-          return (
-              <Fragment>
-                  {text}
-                  <span className="quran-verse-circle">{extractedNumber}</span>
-              </Fragment>
-          );
-      }
-      return text;
+      const regex = /([۝﴿﴾]?\s*[٠-٩۰-۹0-9]+\s*[۝﴿﴾]?)/g;
+      const parts = text.split(regex);
+      return parts.map((part, i) => {
+          if (part.match(/[٠-٩۰-۹0-9]/)) {
+              const englishNum = toEnglishDigits(part.replace(/[^٠-٩۰-۹0-9]/g, ''));
+              return <span key={i} className="quran-verse-circle">{englishNum}</span>;
+          }
+          return part;
+      });
 };
 
 const App = () => {
-  const [activePageId, setActivePageId] = useState('pquran'); // Default to Quran since it's the only page!
+  const [viewMode, setViewMode] = useState('intro'); // Start at Bismillah Page
+  const [searchTerm, setSearchTerm] = useState(""); 
+  const [isRecording, setIsRecording] = useState(false);
+  const [activePageId, setActivePageId] = useState('pquran'); 
   const [selectedSurahIdx, setSelectedSurahIdx] = useState(null);
   const [isReadingMode, setIsReadingMode] = useState(false);
   const [targetId, setTargetId] = useState(null);
-  const [showBookmarkAlert, setShowBookmarkAlert] = useState(false);
   const [actionMenu, setActionMenu] = useState(null);
-
   const [jumpVerse, setJumpVerse] = useState("");
-
   const [bookmarks, setBookmarks] = useState(() => {
       const saved = localStorage.getItem('qalb_faves_final_v12');
       return saved ? JSON.parse(saved) : [];
   });
-
-  const [arabicFont, setArabicFont] = useState(() => { return localStorage.getItem('qalb_arabic_font') || 'indopak'; });
+  const [arabicFont, setArabicFont] = useState(() => localStorage.getItem('qalb_arabic_font') || 'indopak');
   const [showSettings, setShowSettings] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showBookmarksList, setShowBookmarksList] = useState(false); 
-
   const [theme, setTheme] = useState(THEMES.standard);
   const [fontScale, setFontScale] = useState(0);
   const [lineHeight, setLineHeight] = useState(1.6); 
   const [showTranslation, setShowTranslation] = useState(true); 
-  
   const [isPlaying, setIsPlaying] = useState(false);
-  const [activeAudioUrl, setActiveAudioUrl] = useState(null);
   const [playingAyah, setPlayingAyah] = useState(null);
   const [playingReciter, setPlayingReciter] = useState(null);
   const audioRef = useRef(new Audio());
@@ -13507,543 +13490,228 @@ const App = () => {
   const totalVersesRef = useRef(0);
   const pageIdRef = useRef(null);
 
+  // --- AI TEACHER VOICE ---
+  const startVoiceTest = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) { alert("Voice recognition not supported."); return; }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ar-SA';
+    recognition.onstart = () => setIsRecording(true);
+    recognition.onend = () => setIsRecording(false);
+    recognition.onresult = (event) => alert("AI Teacher heard: " + event.results[0][0].transcript);
+    recognition.start();
+  };
+
   useEffect(() => { const splash = document.getElementById('splash-overlay'); if (splash) setTimeout(() => splash.style.display = 'none', 800); }, []);
   
   useEffect(() => { 
       const audio = audioRef.current; 
       const handleEnded = () => { 
-          if (pageIdRef.current === 'pquran' && currentAyahRef.current) {
-              if (currentAyahRef.current < totalVersesRef.current) {
-                  setPlayingAyah(prev => prev + 1);
-              } else {
-                  setIsPlaying(false);
-                  setPlayingAyah(null);
-                  setPlayingReciter(null);
-              }
-          } else {
-              setIsPlaying(false); 
-              setActiveAudioUrl(null); 
-          }
+          if (currentAyahRef.current < totalVersesRef.current) setPlayingAyah(prev => prev + 1);
+          else { setIsPlaying(false); setPlayingAyah(null); }
       }; 
       audio.addEventListener('ended', handleEnded); 
       return () => audio.removeEventListener('ended', handleEnded); 
   }, []);
 
   useEffect(() => {
-      if (activePageId !== 'pquran' || !isPlaying || !playingAyah || !playingReciter || selectedSurahIdx === null) return;
-      
+      if (!isPlaying || !playingAyah || !playingReciter || selectedSurahIdx === null) return;
       const surahId = SURAHS_LIST[selectedSurahIdx]?.id;
-      if (!surahId) return;
-
       const pad = (num) => String(num).padStart(3, '0');
-      const baseUrl = playingReciter === 'alafasy' 
-          ? 'https://everyayah.com/data/Alafasy_128kbps/' 
-          : 'https://everyayah.com/data/Minshawy_Murattal_128kbps/';
-      
-      const fileName = `${pad(surahId)}${pad(playingAyah)}.mp3`;
-      
-      audioRef.current.src = baseUrl + fileName;
-      audioRef.current.play().catch(e => {
-          console.log("Audio play error", e);
-          setIsPlaying(false);
-      });
-
+      const baseUrl = playingReciter === 'alafasy' ? 'https://everyayah.com/data/Alafasy_128kbps/' : 'https://everyayah.com/data/Minshawy_Murattal_128kbps/';
+      audioRef.current.src = `${baseUrl}${pad(surahId)}${pad(playingAyah)}.mp3`;
+      audioRef.current.play().catch(() => setIsPlaying(false));
       setTimeout(() => {
           const el = document.getElementById(`ayah-${playingAyah}`);
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 300);
-  }, [playingAyah, playingReciter, isPlaying, selectedSurahIdx, activePageId]);
+  }, [playingAyah, playingReciter, isPlaying, selectedSurahIdx]);
 
   useEffect(() => { localStorage.setItem('qalb_faves_final_v12', JSON.stringify(bookmarks)); }, [bookmarks]);
-  useEffect(() => { localStorage.setItem('qalb_arabic_font', arabicFont); }, [arabicFont]);
-  
-  useEffect(() => {
-      if (audioRef.current) audioRef.current.pause();
-      setIsPlaying(false);
-      setPlayingAyah(null);
-      setPlayingReciter(null);
-      setTimeout(() => { if (scrollRef.current && !targetId) scrollRef.current.scrollTop = 0; }, 50);
-  }, [selectedSurahIdx]);
-
-  useEffect(() => {
-    if (isReadingMode && targetId) { 
-        setTimeout(() => {
-            const el = document.getElementById(targetId); 
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
-        }, 400);
-    }
-  }, [isReadingMode, targetId, selectedSurahIdx, activePageId]);
-
   useEffect(() => {
       currentAyahRef.current = playingAyah;
-      pageIdRef.current = activePageId;
-      if (typeof SURAHS_LIST !== 'undefined' && selectedSurahIdx !== null) {
-          totalVersesRef.current = parseInt(SURAHS_LIST[selectedSurahIdx]?.verses || 0);
-      }
-  }, [playingAyah, activePageId, selectedSurahIdx]);
-
-  const toggleAudio = (url) => {
-    setPlayingAyah(null);
-    setPlayingReciter(null);
-    if (activeAudioUrl === url && isPlaying) { audioRef.current.pause(); setIsPlaying(false); } 
-    else { if (activeAudioUrl !== url) { audioRef.current.src = url; setActiveAudioUrl(url); } audioRef.current.play(); setIsPlaying(true); }
-  };
+      if (selectedSurahIdx !== null) totalVersesRef.current = parseInt(SURAHS_LIST[selectedSurahIdx]?.verses || 0);
+  }, [playingAyah, selectedSurahIdx]);
 
   const playQuranAudio = (reciter) => {
-      setActiveAudioUrl(null); 
-      if (isPlaying && playingReciter === reciter && playingAyah !== null) {
-          audioRef.current.pause();
-          setIsPlaying(false);
-          return;
-      }
-      setPlayingReciter(reciter);
-      if (!playingAyah) setPlayingAyah(1);
-      setIsPlaying(true);
+    if (isPlaying && playingReciter === reciter) { audioRef.current.pause(); setIsPlaying(false); return; }
+    setPlayingReciter(reciter); if (!playingAyah) setPlayingAyah(1); setIsPlaying(true);
   };
 
   const closeAllModals = () => { setShowSettings(false); setShowAbout(false); setShowBookmarksList(false); };
-
-  const openBookmarkMenu = (cardOrBlock, fallbackTitle, pageId, targetId) => {
-      let title = fallbackTitle; let arabic = '';
-      if (cardOrBlock.type) {
-          if (cardOrBlock.type.includes('arabic')) arabic = cardOrBlock.text;
-          if (cardOrBlock.type.includes('title')) title = cardOrBlock.text;
-      } else if (cardOrBlock.content) {
-          const tBlock = cardOrBlock.content.find(b => b.type.includes('title'));
-          const aBlock = cardOrBlock.content.find(b => b.type.includes('arabic'));
-          if (tBlock) title = tBlock.text;
-          if (aBlock) arabic = aBlock.text;
-      }
-      arabic = arabic ? String(arabic).replace(/۞/g, '') : '';
-      setActionMenu({ title, pageId, targetId, arabic });
-  };
+  const removeBookmark = (key) => setBookmarks(bookmarks.filter(b => b.key !== key));
+  const decreaseLineHeight = () => setLineHeight(prev => Number(Math.max(1.0, prev - 0.1).toFixed(1)));
+  const increaseLineHeight = () => setLineHeight(prev => Number(Math.min(3.0, prev + 0.1).toFixed(1)));
 
   const handleSave = () => {
-      if (!actionMenu) return;
       const { title, pageId, targetId, arabic } = actionMenu;
       const bKey = `${pageId}|${title}|${targetId}`;
       if (!bookmarks.some(b => b.key === bKey)) {
-          const dateSaved = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-          setBookmarks([...bookmarks, { key: bKey, pageId, title, targetId, arabic, date: dateSaved }]);
-          setShowBookmarkAlert(true); setTimeout(() => setShowBookmarkAlert(false), 2000);
+          setBookmarks([...bookmarks, { key: bKey, pageId, title, targetId, arabic, date: new Date().toLocaleDateString() }]);
       }
       setActionMenu(null);
   };
 
-  const removeBookmark = (key) => { setBookmarks(bookmarks.filter(b => b.key !== key)); };
-  const decreaseLineHeight = () => setLineHeight(prev => Number(Math.max(1.0, prev - 0.1).toFixed(1)));
-  const increaseLineHeight = () => setLineHeight(prev => Number(Math.min(3.0, prev + 0.1).toFixed(1)));
+  const openBookmarkMenu = (cardOrBlock, fallbackTitle, pageId, targetId) => {
+      let title = fallbackTitle; let arabic = '';
+      if (cardOrBlock.type?.includes('arabic')) arabic = cardOrBlock.text;
+      else if (cardOrBlock.content) {
+          const aBlock = cardOrBlock.content.find(b => b.type.includes('arabic'));
+          if (aBlock) arabic = aBlock.text;
+      }
+      setActionMenu({ title, pageId, targetId, arabic: String(arabic).replace(/۞/g, '') });
+  };
 
   const handleJumpToVerse = (e) => {
-      e.preventDefault();
-      if(!jumpVerse) return;
+      e.preventDefault(); if(!jumpVerse) return;
       const targetVerse = jumpVerse.trim();
-      const quranData = typeof PAGES_DATA !== 'undefined' ? PAGES_DATA['pquran'] : null;
-      const card = quranData?.cards[selectedSurahIdx];
-      if(!card) return;
-
-      let counter = 1;
-      let foundIdx = -1;
-      
+      const card = PAGES_DATA.pquran.cards[selectedSurahIdx];
+      let counter = 1; let foundIdx = -1;
       for(let i=0; i<card.content.length; i++) {
           const block = card.content[i];
           if (block.type.startsWith('arabic')) {
-              let hasHardcoded = false;
-              const parts = block.text.split(/([۝﴿﴾]?\s*[٠-٩۰-۹0-9]+\s*[۝﴿﴾]?)/g);
-              for(let part of parts) {
-                  if(/[٠-٩۰-۹0-9]/.test(part)) {
-                      hasHardcoded = true;
-                      if(toEnglishDigits(part.replace(/[^٠-٩۰-۹0-9]/g, '')) === targetVerse) { foundIdx = i; break; }
-                  }
-              }
-              if(foundIdx !== -1) break;
-              
-              if(!hasHardcoded) {
-                  let foundEng = false;
-                  for(let j=i+1; j<=i+2 && j<card.content.length; j++) {
-                      if(card.content[j].type === 'text') {
-                          const match = card.content[j].text.match(/^[\s\[{:]*(\d+)[\s\]}:.-]+/);
-                          if(match) {
-                              counter = parseInt(match[1]) + 1;
-                              if(match[1] === targetVerse) foundIdx = i;
-                              foundEng = true;
-                              break;
-                          }
-                      }
-                  }
-                  if(foundIdx !== -1) break;
-                  
-                  if(!foundEng) {
-                      const isBismillah = block.text.includes('بِسْمِ') || block.text.includes('بسم');
-                      if(!isBismillah && block.text.trim().length > 0) {
-                          if(counter.toString() === targetVerse) { foundIdx = i; break; }
-                          counter++;
-                      }
-                  }
-              }
+              if (counter.toString() === targetVerse) { foundIdx = i; break; }
+              if (!block.text.includes('بِسْمِ')) counter++;
           }
       }
-      
       if(foundIdx !== -1) {
           const el = document.getElementById(`ayah-${targetVerse}`) || document.getElementById(`q-${foundIdx}`);
           if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
-          if (typeof setPlayingAyah === 'function') setPlayingAyah(parseInt(targetVerse));
-          if (typeof isPlaying !== 'undefined' && isPlaying && typeof playingReciter !== 'undefined' && playingReciter) {
-              if (audioRef && audioRef.current) {
-                  audioRef.current.pause();
-                  setTimeout(() => { setIsPlaying(true); }, 100);
-              }
-          }
-      } else {
-          alert("Verse " + targetVerse + " not found.");
-      }
+          setPlayingAyah(parseInt(targetVerse));
+      } else { alert("Verse " + targetVerse + " not found."); }
       setJumpVerse("");
   };
 
   const renderBlock = (block, idx, blockId, isCleanLayout, isMushafMode, extractedNum) => {
-    if (!block) return null;
-    const aSize = 28 + (fontScale * 2); 
-    const eSize = 16 + (fontScale * 1);
-    const activeFontFamily = ARABIC_FONTS[arabicFont]?.family || '"Amiri", serif';
-
-    const clean = (t) => t ? String(t).replace(/۞/g, '') : '';
-
-    switch (block.type) {
-      case 'title':
-      case 'section-title': 
-      case 'title-green': 
-        if (isCleanLayout) {
-           return <div id={blockId} key={idx} className="block w-full text-center text-[15px] mb-2 mt-4 uppercase tracking-widest font-normal" style={{color: theme.accent}}>{clean(block.text)}</div>;
-        }
-        return <h3 id={blockId} key={idx} className="text-center font-normal text-[14px] mb-4 uppercase tracking-widest" style={{color: theme.accent}}>{block.text}</h3>;
-      
-      case 'flower-icon':
-        return <div key={idx} className="block w-full text-center my-3 text-xl opacity-60" style={{color: theme.accent}}>{block.text}</div>;
-
-      case 'count-badge':
-        return (
-          <div key={idx} className="flex justify-center mb-6 mt-2 w-full">
-              <span className="px-5 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest border shadow-sm" style={{color: theme.accent, borderColor: theme.accent, backgroundColor: `${theme.accent}15`}}>
-                  {block.text}
-              </span>
-          </div>
-        );
-
-      case 'arabic': 
-      case 'arabic-indopak': 
-      case 'arabic-green':
-        if (isCleanLayout) {
-            const arColor = block.type === 'arabic-green' ? '#4ADE80' : theme.text;
-            if (isMushafMode) {
-                return (
-                    <span className="inline px-1 leading-[2.5]" style={{ fontFamily: activeFontFamily, fontSize: `${aSize}px`, color: arColor }}>
-                        {formatArabicWithEnglishNumbers(clean(block.text), extractedNum)}
-                    </span>
-                );
-            }
-            return (
-              <p key={idx} dir="rtl" className="text-center mb-1 px-3" style={{ fontFamily: activeFontFamily, fontSize: `${aSize}px`, color: arColor, lineHeight: lineHeight }}>
-                  {formatArabicWithEnglishNumbers(clean(block.text), extractedNum)}
-              </p>
-            );
-        }
-        const origArColor = block.type === 'arabic-green' ? '#4ADE80' : theme.text;
-        return <p key={idx} dir="rtl" className="text-center mb-4 px-4" style={{ fontFamily: activeFontFamily, fontSize: `${aSize}px`, color: origArColor, lineHeight: lineHeight }}>{clean(block.text)}</p>;
-      
-      case 'text': 
-        if (!showTranslation) return null; 
-        if (isCleanLayout) {
-            let englishText = clean(block.text);
-            let engVerseNum = null;
-            
-            const match = englishText.match(/^[^0-9a-zA-Z]*(\d+)[^0-9a-zA-Z]+(.*)/);
-            if (match) { 
-                engVerseNum = match[1]; 
-                englishText = match[2]; 
-            } else if (extractedNum) {
-                engVerseNum = extractedNum;
-            }
-
-            return (
-              <Fragment key={idx}>
-                <p className="text-center mt-2 mb-3 px-6" style={{ fontSize: `${eSize}px`, color: theme.text, lineHeight: lineHeight, fontFamily: '"Georgia", serif', opacity: 0.85 }}>
-                  {engVerseNum && <span className="inline-flex items-center justify-center w-[22px] h-[22px] border rounded-full text-[10px] mr-2 mb-0.5" style={{borderColor: theme.text, opacity: 0.5}}>{engVerseNum}</span>}
-                  {englishText}
-                </p>
-                <div className="w-1/3 mx-auto h-[1px] my-5" style={{ backgroundColor: theme.text, opacity: 0.1 }} />
-              </Fragment>
-            );
-        }
-        return <p key={idx} className="text-center mb-8 opacity-80 px-0 font-medium" style={{ fontSize: `${eSize}px`, color: theme.text, lineHeight: lineHeight }}>{block.text}</p>;
-      
-      case 'hr': 
-        return <div key={idx} className="h-[0.5px] w-full my-8 block" style={{backgroundColor: theme.accent, opacity: 0.2}} />;
-      
-      default: return null;
-    }
+    const aSize = 28 + (fontScale * 2); const eSize = 16 + (fontScale * 1);
+    const activeFontFamily = ARABIC_FONTS[arabicFont]?.family;
+    const clean = (t) => String(t).replace(/۞/g, '');
+    if (block.type.startsWith('arabic')) return <p dir="rtl" className="text-center mb-4 px-4" style={{ fontFamily: activeFontFamily, fontSize: `${aSize}px`, color: theme.text, lineHeight: lineHeight }}>{formatArabicWithEnglishNumbers(clean(block.text), extractedNum)}</p>;
+    if (block.type === 'text') return showTranslation ? <p className="text-center mb-8 opacity-80 px-6" style={{ fontSize: `${eSize}px`, color: theme.text, lineHeight: lineHeight }}>{block.text}</p> : null;
+    if (block.type.includes('title')) return <h3 className="text-center font-normal text-[14px] mb-4 uppercase tracking-widest" style={{color: theme.accent}}>{block.text}</h3>;
+    return null;
   };
+
+  const renderIntroScreen = () => (
+    <div className="flex flex-col h-full items-center justify-center text-center p-6" style={{backgroundColor: theme.bg}}>
+      <div className="mihrab-container flex flex-col items-center justify-center w-full max-w-md" style={{minHeight: '60vh', borderRadius: '150px 150px 50px 50px', border: `2px solid ${theme.accent}`}}>
+        <h2 className="font-arabic text-4xl mb-4" style={{color: theme.accent}}>بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</h2>
+        <p className="text-[12px] uppercase tracking-[4px] mb-12 opacity-70" style={{color: theme.text}}>The Holy Quran</p>
+        <button onClick={() => setViewMode('index')} className="dua-btn w-64 py-4 text-lg" style={{borderWidth: '2px', borderColor: theme.accent, color: theme.accent}}>OPEN QURAN</button>
+      </div>
+    </div>
+  );
 
   const renderQuranIndex = () => (
    <div className="flex flex-col h-full overflow-hidden" style={{backgroundColor: theme.bg}}>
-      <div className="app-header" style={{borderBottom: `1px solid ${theme.text}15`}}><div className="header-content" style={{color: theme.text}}><button onClick={() => setActivePageId(null)} className="absolute left-5 p-1"><IconBack /></button><h1 className="font-bold text-[12px] uppercase tracking-widest">Quran Kareem</h1><button onClick={() => setShowSettings(true)} className="absolute right-5 p-1"><IconSettings /></button></div></div>
-      <main className="main-content py-4"><div className="max-w-md mx-auto">{SURAHS_LIST.map((surah, i) => (<div key={i} onClick={() => { setSelectedSurahIdx(i); setTargetId(null); setActivePageId('pquran'); }} className="surah-card cursor-pointer active:opacity-70 border" style={{backgroundColor: theme.card, borderColor: `${theme.text}20`}}><div className="surah-num-box" style={{color: theme.accent, borderColor: theme.accent}}>{surah.id}</div><div className="surah-info"><span className="surah-en-name" style={{color: theme.text}}>{surah.name}</span><span className="surah-v-count" style={{color: theme.text, opacity: 0.6}}>{surah.verses} Verses</span></div><div className="surah-ar-name" style={{color: theme.text}}>{surah.ar}</div></div>))}</div></main>
+      <div className="app-header" style={{borderBottom: `1px solid ${theme.text}15`}}>
+          <div className="header-content flex-col h-auto py-3" style={{color: theme.text}}>
+              <button onClick={() => setViewMode('intro')} className="absolute left-5 top-4 p-1"><IconBack /></button>
+              <h1 className="font-bold text-[12px] uppercase tracking-widest mb-3">Quran Kareem</h1>
+              <div className="px-5 w-full">
+                  <input type="text" placeholder="Search Surah..." className="w-full bg-black/20 border rounded-full px-4 py-2 text-xs focus:outline-none" style={{borderColor: `${theme.accent}40`, color: theme.text}} onChange={(e) => setSearchTerm(e.target.value.toLowerCase())} />
+              </div>
+              <button onClick={() => setShowSettings(true)} className="absolute right-5 top-4 p-1"><IconSettings /></button>
+          </div>
+      </div>
+      <main className="main-content py-4">
+          <div className="max-w-md mx-auto">
+              {SURAHS_LIST.filter(s => s.name.toLowerCase().includes(searchTerm)).map((surah, i) => (
+                  <div key={i} onClick={() => setSelectedSurahIdx(SURAHS_LIST.indexOf(surah))} className="surah-card cursor-pointer border" style={{backgroundColor: theme.card, borderColor: `${theme.text}20`}}>
+                      <div className="surah-num-box" style={{color: theme.accent, borderColor: theme.accent}}>{surah.id}</div>
+                      <div className="surah-info"><span className="surah-en-name" style={{color: theme.text}}>{surah.name}</span></div>
+                      <div className="surah-ar-name" style={{color: theme.text}}>{surah.ar}</div>
+                  </div>
+              ))}
+          </div>
+      </main>
     </div>
   );
 
   const renderQuranReading = () => {
-    const quranData = typeof PAGES_DATA !== 'undefined' ? PAGES_DATA['pquran'] : null; 
-    const card = quranData?.cards[selectedSurahIdx]; 
+    const card = PAGES_DATA.pquran.cards[selectedSurahIdx];
     const surahMeta = SURAHS_LIST[selectedSurahIdx];
-    const isMushafMode = !showTranslation;
-    
-    let autoVerseCounter = 1;
-    let currentVerseNumStr = null;
-
+    let autoVerseCounter = 1; let currentVerseNumStr = null;
     return (
       <div className="flex flex-col h-full overflow-hidden" style={{backgroundColor: theme.bg}}>
         <div className="app-header" style={{borderBottom: `1px solid ${theme.text}15`}}>
           <div className="header-content" style={{color: theme.text}}>
-              <button onClick={() => {setSelectedSurahIdx(null); audioRef.current.pause(); setIsPlaying(false);}} className="absolute left-5 p-1"><IconBack /></button>
-              <h1 className="font-bold text-[12px] uppercase tracking-widest">{surahMeta?.name}</h1>
+              <button onClick={() => setSelectedSurahIdx(null)} className="absolute left-5 p-1"><IconBack /></button>
+              <h1 className="font-bold text-[12px] uppercase tracking-widest">{surahMeta.name}</h1>
               <button onClick={() => setShowSettings(true)} className="absolute right-5 p-1"><IconSettings /></button>
           </div>
         </div>
-        
-        <main ref={scrollRef} className="main-content clean-layout-mode"><div className="max-w-2xl mx-auto py-4">
-          
+        <main ref={scrollRef} className="main-content py-4">
           <form onSubmit={handleJumpToVerse} className="flex gap-2 px-4 mb-4 justify-center items-center">
-              <input type="number" value={jumpVerse} onChange={(e) => setJumpVerse(e.target.value)} placeholder="Verse #" className="bg-transparent border border-opacity-30 rounded-lg text-sm px-4 py-2 text-center w-24 focus:outline-none" style={{borderColor: theme.accent, color: theme.text}} />
-              <button type="submit" className="px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-widest" style={{backgroundColor: `${theme.accent}20`, color: theme.accent, border: `1px solid ${theme.accent}`}}>Jump</button>
+              <input type="number" value={jumpVerse} onChange={(e) => setJumpVerse(e.target.value)} placeholder="Verse #" className="bg-transparent border rounded-lg text-sm px-4 py-2 text-center w-24" style={{borderColor: theme.accent, color: theme.text}} />
+              <button type="submit" className="px-4 py-2 rounded-lg text-sm font-bold border" style={{color: theme.accent, borderColor: theme.accent}}>Jump</button>
           </form>
-
-         <div className="flex gap-3 px-4 pb-6 mb-2 border-b" style={{borderColor: `${theme.text}10`}}>
-            <button onClick={() => playQuranAudio('alafasy')} className="flex-1 p-3 border rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors" style={{backgroundColor: isPlaying && playingReciter === 'alafasy' ? theme.accent : `${theme.accent}10`, borderColor: theme.accent, color: isPlaying && playingReciter === 'alafasy' ? theme.bg : theme.accent}}>
-                {isPlaying && playingReciter === 'alafasy' && playingAyah ? 'Alafasy ❚❚' : 'Alafasy ▶'}
-            </button>
-            <button onClick={() => playQuranAudio('minshawi')} className="flex-1 p-3 border rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors" style={{backgroundColor: isPlaying && playingReciter === 'minshawi' ? theme.accent : `${theme.accent}10`, borderColor: theme.accent, color: isPlaying && playingReciter === 'minshawi' ? theme.bg : theme.accent}}>
-                {isPlaying && playingReciter === 'minshawi' && playingAyah ? 'Minshawi ❚❚' : 'Minshawi ▶'}
-            </button>
+          <div className="flex flex-col gap-3 px-4 pb-6 mb-2 border-b" style={{borderColor: `${theme.text}10`}}>
+            <div className="flex gap-3">
+                <button onClick={() => playQuranAudio('alafasy')} className="flex-1 p-3 border rounded-xl text-[10px] font-bold" style={{borderColor: theme.accent, color: theme.accent}}>{isPlaying && playingReciter === 'alafasy' ? 'PAUSE' : 'ALAFASY'}</button>
+                <button onClick={() => playQuranAudio('minshawi')} className="flex-1 p-3 border rounded-xl text-[10px] font-bold" style={{borderColor: theme.accent, color: theme.accent}}>{isPlaying && playingReciter === 'minshawi' ? 'PAUSE' : 'MINSHAWI'}</button>
+            </div>
+            <button onClick={startVoiceTest} className="w-full p-3 border rounded-xl text-[10px] font-bold" style={{backgroundColor: isRecording ? '#ff4d4d' : 'transparent', color: isRecording ? 'white' : theme.accent, borderColor: isRecording ? '#ff4d4d' : theme.accent}}>TEST RECITATION (AI TEACHER) 🎤</button>
           </div>
-        
-          <div className={isMushafMode ? "mushaf-container" : ""}>
-              {card?.content.map((block, bIdx, arr) => {
+          <div className="max-w-2xl mx-auto py-4">
+              {card.content.map((block, bIdx, arr) => {
                   let extractedNum = null;
-                  
                   if (block.type.startsWith('arabic')) {
-                      const isBismillah = block.text.includes('بِسْمِ') || block.text.includes('بسم');
-                      if (isBismillah) {
-                          extractedNum = null;
-                          currentVerseNumStr = null;
-                      } else if (/[٠-٩۰-۹0-9]/.test(block.text)) { 
-                          extractedNum = null; 
-                          currentVerseNumStr = null;
-                      } else {
-                          let foundEng = false;
-                          for (let j = bIdx + 1; j <= bIdx + 2 && j < arr.length; j++) {
-                              if (arr[j].type === 'text') {
-                                  const match = arr[j].text.match(/^[^0-9a-zA-Z]*(\d+)[^0-9a-zA-Z]+/);
-                                  if (match) { 
-                                      extractedNum = match[1]; 
-                                      autoVerseCounter = parseInt(match[1]) + 1; 
-                                      foundEng = true; 
-                                      break; 
-                                  }
-                              }
-                          }
-                          if (!foundEng && block.text.trim().length > 0) { 
-                              extractedNum = autoVerseCounter.toString(); 
-                              autoVerseCounter++; 
-                          }
-                      }
+                      if (!block.text.includes('بِسْمِ')) { extractedNum = autoVerseCounter.toString(); autoVerseCounter++; }
                       currentVerseNumStr = extractedNum;
-                  } else if (block.type === 'text') {
-                      extractedNum = currentVerseNumStr;
-                      currentVerseNumStr = null;
-                  }
-
-                 const isTitleOrBlock = block.type.includes('title') || block.type === 'hr' || block.type === 'flower-icon' || block.type === 'count-badge';
+                  } else if (block.type === 'text') { extractedNum = currentVerseNumStr; currentVerseNumStr = null; }
                   const isHighlighted = isPlaying && playingAyah && extractedNum === playingAyah.toString();
-                  
-                  let wrapperClass = isMushafMode 
-                      ? (isTitleOrBlock ? "mushaf-item block-force" : "mushaf-item cursor-pointer transition-opacity")
-                      : "verse-row cursor-pointer active:opacity-70 transition-opacity";
-
-                  if (isHighlighted && !isMushafMode) { wrapperClass = "cursor-pointer active:opacity-70 transition-all py-[5px] px-[10px]"; }
-
-                  const highlightStyle = isHighlighted ? { backgroundColor: `${theme.accent}33`, borderRadius: '16px' } : {};
-                  const dynamicId = extractedNum ? `ayah-${extractedNum}` : `q-${bIdx}`;
-
                   return (
-                      <div key={bIdx} id={dynamicId} className={wrapperClass} style={highlightStyle} onClick={() => openBookmarkMenu(block, surahMeta?.name, 'pquran', dynamicId)}>
-                          {renderBlock(block, bIdx, block._jId, true, isMushafMode, extractedNum)}
+                      <div key={bIdx} id={extractedNum ? `ayah-${extractedNum}` : `q-${bIdx}`} style={isHighlighted ? { backgroundColor: `${theme.accent}33`, borderRadius: '16px' } : {}} className="py-2 px-2" onClick={() => openBookmarkMenu(block, surahMeta.name, 'pquran', `ayah-${extractedNum}`)}>
+                          {renderBlock(block, bIdx, null, true, !showTranslation, extractedNum)}
                       </div>
                   );
               })}
           </div>
-          
-          <div className="flex justify-between px-4 mt-8 pt-6 border-t" style={{borderColor: `${theme.text}15`}}>
-              {selectedSurahIdx > 0 ? (
-                  <button type="button" onClick={() => { setSelectedSurahIdx(selectedSurahIdx - 1); setTimeout(() => { if(scrollRef.current) scrollRef.current.scrollTop = 0; }, 50); }} className="px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all" style={{borderColor: theme.accent, color: theme.accent}}>
-                      ← Previous
-                  </button>
-              ) : <div />}
-
-              {selectedSurahIdx < SURAHS_LIST.length - 1 ? (
-                  <button type="button" onClick={() => { setSelectedSurahIdx(selectedSurahIdx + 1); setTimeout(() => { if(scrollRef.current) scrollRef.current.scrollTop = 0; }, 50); }} className="px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all" style={{backgroundColor: `${theme.accent}15`, borderColor: theme.accent, color: theme.accent}}>
-                      Next Surah →
-                  </button>
-              ) : <div />}
-          </div>
-
-          <div className="h-48" />
-        </div></main>
-        
-        <div className="floating-controls">
-          <button type="button" onClick={() => {setSelectedSurahIdx(null); setActivePageId(null);}} className="f-btn"><IconHome /></button>
-          <button type="button" onClick={() => setShowSettings(true)} className="f-btn"><span className="font-bold text-[18px]">S</span></button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderMenu = () => {
-    return (
-      <div className="flex flex-col h-full overflow-hidden" style={{backgroundColor: '#051F22'}}>
-        <div className="app-header" style={{borderBottom: '1px solid rgba(197, 160, 89, 0.3)'}}><div className="header-content"><h1 className="font-bold text-[22px] text-[#C5A059] uppercase tracking-widest">Qalb-e-Dua</h1><button onClick={() => setShowSettings(true)} className="absolute right-6 p-1" style={{color: '#C5A059'}}><IconSettings /></button></div></div>
-        <main className="main-content">
-            <div className="mihrab-container">
-                <div className="max-w-md mx-auto mt-2">
-                    {MENU_ITEMS.map(item => <button key={item.id} onClick={() => { setActivePageId(item.pageId); setIsReadingMode(false); setTargetId(null); }} className="dua-btn">{item.label}</button>)}
-                </div>
-            </div>
         </main>
+        <div className="floating-controls"><button onClick={() => {setSelectedSurahIdx(null); setViewMode('intro');}} className="f-btn"><IconHome /></button></div>
       </div>
     );
   };
 
   const renderPage = () => {
-    if (activePageId === 'pquran') return selectedSurahIdx !== null ? renderQuranReading() : renderQuranIndex();
-    return renderMenu();
+    if (viewMode === 'intro') return renderIntroScreen();
+    return selectedSurahIdx !== null ? renderQuranReading() : renderQuranIndex();
   };
 
   return (
-    <div id="root" style={{backgroundColor: activePageId ? theme.bg : '#051F22'}}>
+    <div id="root" style={{backgroundColor: theme.bg}}>
       {renderPage()}
-      
-      {/* Action Menu Modal */}
       {actionMenu && (
-          <div className="fixed inset-0 z-[1000] flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={() => setActionMenu(null)}>
-              <div className="w-full max-w-md bg-[#18181b] rounded-t-3xl p-6 shadow-2xl" style={{ borderTop: `1px solid ${theme.accent}40` }} onClick={e => e.stopPropagation()}>
-                  <h4 className="text-white/50 text-[10px] uppercase tracking-widest mb-4 px-2 text-center">{actionMenu.title}</h4>
-                  <button type="button" onClick={() => handleSave()} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 active:bg-white/10 transition-colors border border-white/5 mb-3">
-                      <IconMenuBookmark />
-                      <span className="text-white text-[15px] font-medium tracking-wide">Bookmark Verse</span>
-                  </button>
-                  <button type="button" onClick={() => setActionMenu(null)} className="w-full flex items-center justify-center p-4 rounded-2xl active:bg-white/5 transition-colors">
-                      <span className="text-white/40 text-[13px] font-bold uppercase tracking-widest">Cancel</span>
-                  </button>
+          <div className="fixed inset-0 z-[1000] flex items-end justify-center bg-black/60" onClick={() => setActionMenu(null)}>
+              <div className="w-full max-w-md bg-[#18181b] rounded-t-3xl p-6" onClick={e => e.stopPropagation()}>
+                  <button onClick={() => handleSave()} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border mb-3"><IconMenuBookmark /><span className="text-white">Bookmark Verse</span></button>
+                  <button onClick={() => setActionMenu(null)} className="w-full p-4 text-white/40 font-bold uppercase">Cancel</button>
               </div>
           </div>
       )}
-
-      {/* Settings Modal */}
       {showSettings && (
         <div className="modal-overlay" onClick={closeAllModals}>
           <div className="settings-modal mx-auto max-h-[90vh] overflow-y-auto pb-8 w-full max-w-md bg-[#0A0A0A] rounded-t-[40px] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-center font-bold text-[#C5A059] mb-8 uppercase">Settings</h3>
             {showBookmarksList ? (
                <Fragment>
-                  <div className="flex items-center mb-6">
-                      <button type="button" onClick={() => setShowBookmarksList(false)} className="p-1 text-[#C5A059]"><IconBack /></button>
-                      <h3 className="flex-1 text-center font-bold text-[#C5A059] pr-8 uppercase tracking-widest">Saved Bookmarks</h3>
-                  </div>
-                  <div className="max-h-[60vh] overflow-y-auto space-y-4 px-2 pb-2">
-                      {bookmarks.length === 0 ? <p className="text-white/30 text-[12px] text-center italic mt-10">No bookmarks saved yet.</p> : bookmarks.map((b) => (
-                          <div key={b.key} className="w-full rounded-2xl border mb-2 overflow-hidden shadow-lg relative cursor-pointer active:scale-[0.98] transition-transform" style={{ backgroundColor: theme.card, borderColor: `${theme.accent}30` }} onClick={() => { setActivePageId(b.pageId); if (b.pageId === 'pquran') { const sIdx = typeof SURAHS_LIST !== 'undefined' ? SURAHS_LIST.findIndex(s => s.name.toLowerCase() === b.title.toLowerCase()) : -1; if (sIdx !== -1) setSelectedSurahIdx(sIdx); } setIsReadingMode(true); setTargetId(b.targetId); closeAllModals(); }}>
-                              <div className="flex justify-between items-start p-4 pb-3">
-                                  <div className="flex items-center gap-3 pr-2">
-                                      <div className="font-bold text-xs px-3 py-2 rounded-xl" style={{ backgroundColor: theme.accent, color: theme.bg }}>{b.title.substring(0,3).toUpperCase()}</div>
-                                      <h4 className="font-bold text-sm leading-tight line-clamp-2" style={{ color: theme.text }}>{b.title}</h4>
-                                  </div>
-                                  <button type="button" onClick={(e) => { e.stopPropagation(); removeBookmark(b.key); }} className="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-colors"><IconDelete /></button>
-                              </div>
-                              {b.arabic && (
-                                  <div className="px-4 py-4 mx-3 mb-3 rounded-xl border" style={{ backgroundColor: theme.bg, borderColor: `${theme.accent}15` }}>
-                                      <p className="font-arabic text-right text-[22px] leading-relaxed line-clamp-2" dir="rtl" style={{ fontFamily: ARABIC_FONTS[arabicFont]?.family, color: theme.text }}>{b.arabic}</p>
-                                  </div>
-                              )}
-                              <div className="px-5 pb-4 flex items-center gap-2 text-[11px] opacity-60" style={{ color: theme.text }}><IconCalendar /><span>{b.date || 'Saved Bookmark'}</span></div>
-                          </div>
-                      ))}
-                  </div>
-                  <button type="button" onClick={() => setShowBookmarksList(false)} className="dua-btn mt-6">Back to Settings</button>
+                  <div className="flex items-center mb-6"><button onClick={() => setShowBookmarksList(false)}><IconBack /></button><h3 className="flex-1 text-center font-bold text-[#C5A059] uppercase">Saved Bookmarks</h3></div>
+                  <div className="space-y-4">{bookmarks.map((b) => (
+                      <div key={b.key} className="p-4 rounded-2xl border" style={{ borderColor: `${theme.accent}30` }} onClick={() => { const sIdx = SURAHS_LIST.findIndex(s => s.name.toLowerCase() === b.title.toLowerCase()); if (sIdx !== -1) setSelectedSurahIdx(sIdx); setTargetId(b.targetId); closeAllModals(); }}>
+                          <div className="flex justify-between mb-2"><h4 className="font-bold text-white text-sm">{b.title}</h4><button onClick={(e) => { e.stopPropagation(); removeBookmark(b.key); }} className="text-red-400"><IconDelete /></button></div>
+                          <p className="font-arabic text-right text-lg text-white" dir="rtl">{b.arabic}</p>
+                      </div>
+                  ))}</div>
                </Fragment>
-            ) : showAbout ? (
-              <Fragment>
-                <div className="flex items-center mb-6"><button type="button" onClick={(e) => { e.stopPropagation(); setShowAbout(false); }} className="p-1 text-[#C5A059]"><IconBack /></button><h3 className="flex-1 text-center font-bold text-[#C5A059] pr-8 uppercase tracking-widest">About</h3></div>
-                <div className="mb-8 p-4 bg-black/20 rounded-2xl border border-[#C5A059]/10 max-h-[350px] overflow-y-auto text-center text-white/90 text-sm leading-relaxed"><p className="mb-4">Thank you for using this app. A collection of important du a's and dhikr gathered in one place to support daily worship and remembrance of Allah.</p><p className="italic text-[#C5A059] mb-6">May Allah forgive any mistakes, accept this effort, and grant its reward to my family who have passed away and to all Muslims, through the wasilah of Prophet Muhammad (ﷺ) and as sadaqah in the name of Shaykh Abdul Qadir Jilani (rahimahullah))</p><div className="pt-4 border-t border-[#C5A059]/20 text-center"><p className="text-[10px] text-[#C5A059] uppercase tracking-widest">Created By</p><p className="text-white font-bold">Imran Nazamul Hussain Doctor</p></div></div>
-                <button type="button" onClick={(e) => { e.stopPropagation(); setShowAbout(false); }} className="dua-btn">Back</button>
-              </Fragment>
-            
             ) : (
               <Fragment>
-                <h3 className="text-center font-bold text-[#C5A059] mb-8 uppercase tracking-widest">Settings</h3>
-                
-                <div className="flex items-center justify-between mb-8 px-4"><span className="text-white text-sm font-bold uppercase">English Translation</span><div onClick={() => setShowTranslation(!showTranslation)} className={`w-14 h-7 rounded-full relative transition-colors cursor-pointer ${showTranslation?'bg-[#C5A059]':'bg-gray-600'}`}><div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all ${showTranslation?'right-1':'left-1'}`} /></div></div>
-                
-                <div className="mb-8 px-4">
-                  <p className="text-[10px] font-bold text-[#C5A059] uppercase mb-4 tracking-widest text-center">Arabic Script / Font</p>
-                  <div className="grid grid-cols-2 gap-3">
-                      {Object.values(ARABIC_FONTS).map(font => (
-                          <button type="button" key={font.id} onClick={() => setArabicFont(font.id)} className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-colors ${arabicFont === font.id ? 'border-[#C5A059] bg-[#C5A059]/10' : 'border-white/10 bg-black/20'}`}>
-                              <span className={`text-white text-[10px] font-bold uppercase ${arabicFont === font.id ? 'opacity-100 text-[#C5A059]' : 'opacity-60'}`}>{font.name}</span>
-                          </button>
-                      ))}
-                  </div>
-                </div>
-
-                <div className="mb-6 px-4">
-                  <p className="text-[10px] text-[#C5A059] uppercase mb-4 tracking-widest text-center">Font Size</p>
-                  <div className="flex items-center justify-between bg-black/30 rounded-2xl p-2 border border-white/5">
-                      <button type="button" onClick={() => setFontScale(s => Math.max(s-2, -6))} className="w-12 h-12 text-white text-2xl">-</button>
-                      <span className="text-white text-xl" style={{fontFamily: ARABIC_FONTS[arabicFont]?.family}}>بِسْمِ</span>
-                      <button type="button" onClick={() => setFontScale(s => Math.min(s+2, 14))} className="w-12 h-12 text-white text-2xl">+</button>
-                  </div>
-                </div>
-
-                <div className="mb-8 px-4">
-                  <p className="text-[10px] text-[#C5A059] uppercase mb-4 tracking-widest text-center">Line Height</p>
-                  <div className="flex items-center justify-between bg-black/30 rounded-2xl p-2 border border-white/5">
-                      <button type="button" onClick={decreaseLineHeight} className="w-12 h-12 text-white text-2xl">-</button>
-                      <span className="text-[#C5A059] font-bold text-lg">{lineHeight}</span>
-                      <button type="button" onClick={increaseLineHeight} className="w-12 h-12 text-white text-2xl">+</button>
-                  </div>
-                </div>
-                
-                <div className="mb-8 px-4">
-                  <p className="text-[10px] font-bold text-[#C5A059] uppercase mb-4 tracking-widest text-center">Saved Duas</p>
-                  <button type="button" onClick={() => setShowBookmarksList(true)} className="w-full flex items-center justify-between p-4 bg-black/20 rounded-2xl border transition-colors hover:bg-black/40" style={{ borderColor: `${theme.accent}40` }}>
-                      <span className="text-white text-sm font-bold uppercase tracking-wide">Saved Bookmarks</span>
-                      <div className="flex items-center gap-3">
-                          <span className="px-3 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: theme.accent, color: theme.bg }}>{bookmarks.length}</span>
-                          <span style={{ color: theme.accent }}>→</span>
-                      </div>
-                  </button>
-                </div>
-
-                <div className="mb-8 px-4"><p className="text-[10px] font-bold text-[#C5A059] uppercase mb-4 tracking-widest text-center">Theme Mode</p>
-                  <div className="grid grid-cols-2 gap-3">
-                      {Object.values(THEMES).map(t => (
-                          <button type="button" key={t.id} onClick={() => setTheme(t)} className={`p-3 rounded-xl border flex items-center gap-3 ${theme.id===t.id?'border-[#C5A059] bg-[#C5A059]/10':'border-white/10 bg-black/20'}`}>
-                              <span className="text-white text-[10px] font-bold uppercase">{t.name}</span>
-                              <div className="ml-auto w-4 h-4 rounded" style={{backgroundColor: t.bg, border: '1px solid rgba(255,255,255,0.2)'}} />
-                          </button>
-                      ))}
-                  </div>
-                </div>
-
-                <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAbout(true); }} className="dua-btn mb-6 uppercase text-[12px]">About →</button>
-                <button type="button" onClick={closeAllModals} className="dua-btn font-bold">CLOSE</button>
+                <div className="flex justify-between mb-8 px-4"><span className="text-white font-bold uppercase text-xs">Translation</span><div onClick={() => setShowTranslation(!showTranslation)} className={`w-14 h-7 rounded-full relative transition-colors ${showTranslation?'bg-[#C5A059]':'bg-gray-600'}`}><div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all ${showTranslation?'right-1':'left-1'}`} /></div></div>
+                <div className="mb-8 px-4"><p className="text-[10px] text-[#C5A059] uppercase mb-4 text-center">Font Size</p><div className="flex justify-between bg-black/30 rounded-2xl p-2"><button onClick={() => setFontScale(s => Math.max(s-2, -6))} className="w-12 text-white">-</button><span className="text-white">بِسْمِ</span><button onClick={() => setFontScale(s => Math.min(s+2, 14))} className="w-12 text-white">+</button></div></div>
+                <div className="mb-8 px-4"><p className="text-[10px] text-[#C5A059] uppercase mb-4 text-center">Line Height</p><div className="flex justify-between bg-black/30 rounded-2xl p-2"><button onClick={decreaseLineHeight} className="w-12 text-white">-</button><span className="text-white">{lineHeight}</span><button onClick={increaseLineHeight} className="w-12 text-white">+</button></div></div>
+                <div className="grid grid-cols-2 gap-3 mb-8">{Object.values(THEMES).map(t => (<button key={t.id} onClick={() => setTheme(t)} className={`p-3 rounded-xl border flex items-center gap-3 ${theme.id===t.id?'border-[#C5A059] bg-[#C5A059]/10':'border-white/10'}`}><span className="text-white text-[10px] font-bold uppercase">{t.name}</span><div className="ml-auto w-4 h-4 rounded" style={{backgroundColor: t.bg}} /></button>))}</div>
+                <button onClick={() => setShowBookmarksList(true)} className="dua-btn mb-4">Saved Bookmarks</button>
+                <button onClick={closeAllModals} className="dua-btn font-bold">CLOSE</button>
               </Fragment>
             )}
           </div>
@@ -14052,9 +13720,6 @@ const App = () => {
     </div>
   );
 };
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
-</script>
-</body>
-</html>
+</script></body></html>
